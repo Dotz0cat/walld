@@ -1,16 +1,16 @@
 #include "config.h"
 
-settings* read_config(const char* config_file) {
+settings* read_config(const char* config_file, const char* home_dir) {
 	settings* options = malloc(sizeof(settings));
 
 	config_t config;
-	config_setting_t* settings;
+	config_setting_t* setting;
 	const char* source;
 	int colors;
 
 	config_init(&config);
 
-	if (! config_read_file(&config, config_file)) {
+	if (config_read_file(&config, config_file) == CONFIG_TRUE) {
 		config_destroy(&config);
 		return NULL;
 	}
@@ -29,10 +29,10 @@ settings* read_config(const char* config_file) {
 		source = "default";
 	}
 
-	settings = config_lookup(&config, source);
+	setting = config_lookup(&config, source);
 
-	if (settings != NULL) {
-		int count = config_setting_length(settings);
+	if (setting != NULL) {
+		int count = config_setting_length(setting);
 
 		linked_node* entry_point = malloc(sizeof(linked_node));
 
@@ -42,14 +42,28 @@ settings* read_config(const char* config_file) {
 
 
 		for (int i = 0; i < count; i++) {
-			char* item = config_setting_get_string_elem(settings, i);
+			char* item = config_setting_get_string_elem(setting, i);
 
 			current = add_node_to_list(current, item);
 		}
 	}
 	else {
 		options->sources = malloc(sizeof(linked_node));
-		options->sources->image = strdup("/home/seth/.walld/images");
+		int char_count = snprintf(NULL, 0, "%s%s", home_dir, "/.walld/images");
+		if (char_count <= 0) {
+			//tough luck
+			abort();
+		}
+		char* default_folder = malloc(char_count + 1U);
+
+		if (default_folder == NULL) {
+			//tough luck
+			abort();
+		}
+
+		snprintf(default_folder, char_count, "%s%s", home_dir, "/.walld/images");
+
+		options->sources->image = default_folder;
 	}
 
 	config_destroy(&config);
@@ -63,12 +77,12 @@ linked_node* list_file_parse(const char* list_file) {
 	linked_node* current = entry_point;
 
 	config_t config;
-	config_setting_t* settings;
+	config_setting_t* setting;
 	const char* source;
 
 	config_init(&config);
 
-	if (! config_read_file(&config, list_file)) {
+	if (config_read_file(&config, list_file) == CONFIG_TRUE) {
 		config_destroy(&config);
 		return NULL;
 	}
@@ -80,13 +94,13 @@ linked_node* list_file_parse(const char* list_file) {
 		source = "default";
 	}
 
-	settings = config_lookup(&config, source);
+	setting = config_lookup(&config, source);
 
-	if (settings != NULL) {
-		int count = config_setting_length(settings);
+	if (setting != NULL) {
+		int count = config_setting_length(setting);
 
 		for (int i = 0; i < count; i++) {
-			char* item = config_setting_get_string_elem(settings, i);
+			char* item = config_setting_get_string_elem(setting, i);
 
 			current = add_node_to_list(current, item);
 		}

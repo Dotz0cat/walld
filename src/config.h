@@ -15,4 +15,7 @@ struct _settings {
 	linked_node* sources;
 };
 
+settings* read_config(const char* config_file, const char* home_dir);
+linked_node* list_file_parse(const char* list_file);
+
 #endif /*__CONFIG_H__*/

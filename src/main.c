@@ -1,17 +1,23 @@
 #include "main.h"
 
 int main(int argc, char** argv) {
-	init_daemon();
+	pre_init_stuff* info = pre_init();
 
-	while(1) {
-		//stuff
-		syslog(LOG_NOTICE, "Walld is started");
-		sleep(20);
-		break;
-	}
+	printf("%s\n", info->home_dir);
+	printf("%s\n", info->config);
+	printf("%s\n", info->options->sources->image);
+	printf("%s\n", info->picture_list->image);
+	//init_daemon();
 
-	syslog(LOG_NOTICE, "Walld has quit");
-	closelog();
+	// while(1) {
+	// 	//stuff
+	// 	syslog(LOG_NOTICE, "Walld is started");
+	// 	sleep(20);
+	// 	break;
+	// }
+
+	// syslog(LOG_NOTICE, "Walld has quit");
+	// closelog();
 
 	return EXIT_SUCCESS;
 }
@@ -72,7 +78,29 @@ static pre_init_stuff* pre_init() {
 
 	info->home_dir = home;
 
+	int count = snprintf(NULL, 0, "%s%s", home, "/.walld/.walldrc");
 
+	if (count <= 0) {
+		abort();
+	}
+
+	char* config_file = malloc(count + 1u);
+
+	if (config_file == NULL) {
+		abort();
+	}
+
+	snprintf(config_file, count + 1U, "%s%s", home, "/.walld/.walldrc");
+
+	info->config = config_file;
+
+	info->options = read_config(config_file, home);
+
+	info->picture_list = get_images(info->options->sources);
+
+	if (info->picture_list == NULL) {
+		abort();
+	}
 
 	return info;
 }
@@ -81,9 +109,7 @@ linked_node* get_images(linked_node* source) {
 	linked_node* entry_point = malloc(sizeof(linked_node));
 	linked_node* current = entry_point;
 
-	linked_node* source_iter = source;
-
-	while (source_iter->next != NULL) {
+	while (source->next != NULL) {
 		file_type type = get_file_type(source->image);
 
 		switch(type) {
@@ -104,12 +130,25 @@ linked_node* get_images(linked_node* source) {
 				break;
 			}	
 			case(LIST): {
+				linked_node* file_contents = list_file_parse(source->image);
+
+				if (file_contents != NULL) {
+					linked_node* typed = get_images(file_contents);
+
+					if (typed != NULL) {
+						current->next = typed;
+
+						current = wind_to_tail(current);
+					}
+					free_list(file_contents);
+				}
 				break;
 			}
 			case(IMAGE): {
 				current = add_node_to_list(current, source->image);
+
+				break;
 			}
-			break;
 			case(ERROR):
 			default: {
 			//give error
@@ -119,7 +158,7 @@ linked_node* get_images(linked_node* source) {
 			}
 		}
 
-		source_iter = source_iter->next;
+		source = source->next;
 	}
 
 	if (entry_point->image == NULL) {

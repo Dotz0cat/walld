@@ -7,9 +7,9 @@ file_type image_or_text(const char* path) {
 
 	ExceptionInfo* exception;
 
-	MagickCoreGensis(path, MAGICK_FALSE);
+	MagickCoreGenesis(path, MagickFalse);
 
-	exception = AcqureExceptionInfo();
+	exception = AcquireExceptionInfo();
 
 	info = CloneImageInfo((ImageInfo* ) NULL);
 
@@ -21,7 +21,7 @@ file_type image_or_text(const char* path) {
 		CatchException(exception);
 	}
     
-    if (image == (image* ) NULL) {
+    if (image == (Image*) NULL) {
     	//cleanup
     	return LIST;
     }
