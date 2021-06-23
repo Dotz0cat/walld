@@ -61,7 +61,7 @@ settings* read_config(const char* config_file, const char* home_dir) {
 			abort();
 		}
 
-		snprintf(default_folder, char_count, "%s%s", home_dir, "/.walld/images");
+		snprintf(default_folder, char_count + 1U, "%s%s", home_dir, "/.walld/images");
 
 		options->sources->image = default_folder;
 	}

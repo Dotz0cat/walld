@@ -64,7 +64,7 @@ static void init_daemon() {
 	openlog("walld", LOG_PID, LOG_DAEMON);
 }
 
-static pre_init_stuff* pre_init() {
+static pre_init_stuff* pre_init(void) {
 
 	pre_init_stuff* info = malloc(sizeof(pre_init_stuff));
 
@@ -84,7 +84,7 @@ static pre_init_stuff* pre_init() {
 		abort();
 	}
 
-	char* config_file = malloc(count + 1u);
+	char* config_file = malloc(count + 1U);
 
 	if (config_file == NULL) {
 		abort();
@@ -109,7 +109,7 @@ linked_node* get_images(linked_node* source) {
 	linked_node* entry_point = malloc(sizeof(linked_node));
 	linked_node* current = entry_point;
 
-	while (source->next != NULL) {
+	do {
 		file_type type = get_file_type(source->image);
 
 		switch(type) {
@@ -121,9 +121,20 @@ linked_node* get_images(linked_node* source) {
 					linked_node* typed = get_images(dir_list);
 
 					if (typed != NULL) {
-						current->next = typed;
+						if (current == entry_point) {
+							free(entry_point);
 
-						current = wind_to_tail(current);
+							entry_point = typed;
+
+							current = entry_point;
+
+							current = wind_to_tail(current);
+						}
+						else {
+							current->next = typed;
+
+							current = wind_to_tail(current);
+						}
 					}
 					free_list(dir_list);
 				}
@@ -136,9 +147,20 @@ linked_node* get_images(linked_node* source) {
 					linked_node* typed = get_images(file_contents);
 
 					if (typed != NULL) {
-						current->next = typed;
+						if (current == entry_point) {
+							free(entry_point);
 
-						current = wind_to_tail(current);
+							entry_point = typed;
+
+							current = entry_point;
+
+							current = wind_to_tail(current);
+						}
+						else {
+							current->next = typed;
+
+							current = wind_to_tail(current);
+						}
 					}
 					free_list(file_contents);
 				}
@@ -157,9 +179,10 @@ linked_node* get_images(linked_node* source) {
 			break;
 			}
 		}
-
-		source = source->next;
-	}
+		if (source->next != NULL) {
+			source = source->next;
+		}
+	} while (source->next != NULL);
 
 	if (entry_point->image == NULL) {
 		free(entry_point);
@@ -170,6 +193,13 @@ linked_node* get_images(linked_node* source) {
 }
 
 file_type get_file_type(const char* path) {
+	if (path == NULL) {
+		return ERROR;
+	}
+	else if (strcmp(path, "") == 0) {
+		return ERROR;
+	}
+
 	DIR* dir = opendir(path);
 
 	if (dir != NULL) {
@@ -208,6 +238,13 @@ linked_node* list_files_full(const char* directory) {
 		}
 	}
 	else {
+		free(entry_point);
+		return NULL;
+	}
+
+	closedir(dir);
+
+	if (entry_point->image == NULL) {
 		free(entry_point);
 		return NULL;
 	}

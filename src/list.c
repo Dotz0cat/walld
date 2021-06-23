@@ -1,17 +1,34 @@
 #include "list.h"
 
 linked_node* add_node_to_list(linked_node* prev, char* data) {
-	linked_node* node = malloc(sizeof(linked_node));
+	if (prev == NULL) {
+		linked_node* node = malloc(sizeof(linked_node));
 
-	if (prev != NULL) {
-		prev->next = node;
+		node->image = data;
+
+		node->next = NULL;
+
+		return node;
 	}
+	else {
+		if (prev->image == NULL) {
+			prev->image = data;
+			prev->next = NULL;
 
-	node->image = data;
+			return prev;
+		}
+		else {
+			linked_node* node = malloc(sizeof(linked_node));
 
-	node->next = NULL;
+			prev->next = node;
 
-	return node;
+			node->image = data;
+
+			node->next = NULL;
+
+			return node;
+		}
+	}
 }
 
 linked_node* wind_to_tail(linked_node* node) {

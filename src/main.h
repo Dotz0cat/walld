@@ -33,7 +33,7 @@ struct _pre_init_stuff {
 };
 
 static void init_daemon(void);
-static pre_init_stuff* pre_init();
+static pre_init_stuff* pre_init(void);
 linked_node* get_images(linked_node* source);
 file_type get_file_type(const char* path);
 linked_node* list_files_full(const char* directory);
