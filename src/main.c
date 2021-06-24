@@ -106,7 +106,8 @@ static pre_init_stuff* pre_init(void) {
 }
 
 linked_node* get_images(linked_node* source) {
-	linked_node* entry_point = malloc(sizeof(linked_node));
+	linked_node* entry_point = add_node_to_list(NULL, NULL);
+
 	linked_node* current = entry_point;
 
 	do {
@@ -222,7 +223,7 @@ linked_node* list_files_full(const char* directory) {
 
 	dir = opendir(directory);
 
-	linked_node* entry_point = malloc(sizeof(linked_node));
+	linked_node* entry_point = add_node_to_list(NULL, NULL);
 
 	linked_node* current = entry_point;
 
@@ -232,7 +233,9 @@ linked_node* list_files_full(const char* directory) {
 				char* real = realpath_wrap(d->d_name);
 
 				if (real != NULL) {
-					current = add_node_to_list(current, real);
+					if (strcmp(real, ".") != 0 || strcmp(real, "..") != 0) {
+						current = add_node_to_list(current, real);
+					}
 				}
 			}
 		}
@@ -255,6 +258,15 @@ linked_node* list_files_full(const char* directory) {
 
 char* realpath_wrap(const char* path) {
 	char* res = realpath(path, NULL);
+
+	if (res != NULL) {
+		if (strcmp(res, ".") == 0) {
+			return NULL;
+		}
+		else if (strcmp(res, "..") == 0) {
+			return NULL;
+		}
+	}
 
 #if defined(PATH_MAX) && PATH_MAX > 0
 

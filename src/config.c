@@ -34,7 +34,7 @@ settings* read_config(const char* config_file, const char* home_dir) {
 	if (setting != NULL) {
 		int count = config_setting_length(setting);
 
-		linked_node* entry_point = malloc(sizeof(linked_node));
+		linked_node* entry_point = add_node_to_list(NULL, NULL);
 
 		linked_node* current = entry_point;
 
@@ -72,7 +72,7 @@ settings* read_config(const char* config_file, const char* home_dir) {
 }
 
 linked_node* list_file_parse(const char* list_file) {
-	linked_node* entry_point = malloc(sizeof(linked_node));
+	linked_node* entry_point = add_node_to_list(NULL, NULL);
 
 	linked_node* current = entry_point;
 
