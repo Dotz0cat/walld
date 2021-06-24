@@ -229,12 +229,14 @@ linked_node* list_files_full(const char* directory) {
 
 	if (dir != NULL) {
 		while ((d = readdir(dir)) != NULL) {
-			if (strcmp(d->d_name, ".") != 0 || strcmp(d->d_name, "..") != 0) {
-				char* real = realpath_wrap(d->d_name);
+			if (strcmp(d->d_name, ".") != 0) {
+				if (strcmp(d->d_name, "..") != 0) {
+					char* real = realpath_wrap(d->d_name);
 
-				if (real != NULL) {
-					if (strcmp(real, ".") != 0 || strcmp(real, "..") != 0) {
-						current = add_node_to_list(current, real);
+					if (real != NULL) {
+						if (strcmp(real, ".") != 0 || strcmp(real, "..") != 0) {
+							current = add_node_to_list(current, real);
+						}
 					}
 				}
 			}
