@@ -1,4 +1,4 @@
-CFLAGS?= -O0 -g -Wall -Wextra -Wshadow
+CFLAGS?= -O2 -g -Wall -Wextra -Wshadow
 CPPFLAGS= $(shell pkg-config --cflags libconfig MagickWand)
 LDLIBS= $(shell pkg-config --libs libconfig MagickWand)
 

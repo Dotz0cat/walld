@@ -10,7 +10,7 @@ settings* read_config(const char* config_file, const char* home_dir) {
 
 	config_init(&config);
 
-	if (config_read_file(&config, config_file) == CONFIG_TRUE) {
+	if (config_read_file(&config, config_file) != CONFIG_TRUE) {
 		config_destroy(&config);
 		return NULL;
 	}
@@ -42,13 +42,13 @@ settings* read_config(const char* config_file, const char* home_dir) {
 
 
 		for (int i = 0; i < count; i++) {
-			char* item = config_setting_get_string_elem(setting, i);
+			char* item = strdup(config_setting_get_string_elem(setting, i));
 
 			current = add_node_to_list(current, item);
 		}
 	}
 	else {
-		options->sources = malloc(sizeof(linked_node));
+		options->sources = add_node_to_list(NULL, NULL);
 		int char_count = snprintf(NULL, 0, "%s%s", home_dir, "/.walld/images");
 		if (char_count <= 0) {
 			//tough luck
@@ -63,7 +63,7 @@ settings* read_config(const char* config_file, const char* home_dir) {
 
 		snprintf(default_folder, char_count + 1U, "%s%s", home_dir, "/.walld/images");
 
-		options->sources->image = default_folder;
+		options->sources = add_node_to_list(options->sources, default_folder);
 	}
 
 	config_destroy(&config);
@@ -82,7 +82,7 @@ linked_node* list_file_parse(const char* list_file) {
 
 	config_init(&config);
 
-	if (config_read_file(&config, list_file) == CONFIG_TRUE) {
+	if (config_read_file(&config, list_file) != CONFIG_TRUE) {
 		config_destroy(&config);
 		return NULL;
 	}

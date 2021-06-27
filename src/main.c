@@ -231,7 +231,7 @@ linked_node* list_files_full(const char* directory) {
 		while ((d = readdir(dir)) != NULL) {
 			if (strcmp(d->d_name, ".") != 0) {
 				if (strcmp(d->d_name, "..") != 0) {
-					char* real = realpath_wrap(d->d_name);
+					char* real = realpath_wrap(d->d_name, directory);
 
 					if (real != NULL) {
 						if (strcmp(real, ".") != 0 || strcmp(real, "..") != 0) {
@@ -258,8 +258,22 @@ linked_node* list_files_full(const char* directory) {
 	return entry_point;
 }
 
-char* realpath_wrap(const char* path) {
-	char* res = realpath(path, NULL);
+char* realpath_wrap(const char* path, const char* dir) {
+	int count = snprintf(NULL, 0, "%s%s%s", dir, "/", path);
+
+	if (count <= 0) {
+		return NULL;
+	}
+
+	char* longer_path = malloc(count + 1U);
+
+	if (longer_path == NULL) {
+		return NULL;
+	}
+
+	snprintf(longer_path, count + 1U, "%s%s%s", dir, "/", path);
+
+	char* res = realpath(longer_path, NULL);
 
 	if (res != NULL) {
 		if (strcmp(res, ".") == 0) {
@@ -272,12 +286,12 @@ char* realpath_wrap(const char* path) {
 
 #if defined(PATH_MAX) && PATH_MAX > 0
 
-	if (res == NULL && path != NULL && errno == EINVAL) {
+	if (res == NULL && longer_path != NULL && errno == EINVAL) {
 
 		char* resolved_path = malloc(PATH_MAX);
 
 		if (resolved_path != NULL) {
-			char* tmp = realpath(path, resolved_path);
+			char* tmp = realpath(longer_path, resolved_path);
 
 			if (tmp != NULL) {
 				res = strdup(tmp);
@@ -289,6 +303,8 @@ char* realpath_wrap(const char* path) {
 	}
 
 #endif
+
+	free(longer_path);
 
 	return res;
 }
