@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <string.h>
 #include <limits.h>
+#include <regex.h>
 
 #include "config.h"
 #include "magic.h"

@@ -7,6 +7,7 @@ int main(int argc, char** argv) {
 	printf("%s\n", info->config);
 	printf("%s\n", info->options->sources->image);
 	printf("%s\n", info->picture_list->image);
+	printf("%s\n", ((linked_node* ) info->picture_list->next)->image);
 	//init_daemon();
 
 	// while(1) {
@@ -102,6 +103,8 @@ static pre_init_stuff* pre_init(void) {
 		abort();
 	}
 
+	info->picture_list = shuffle(info->picture_list);
+
 	return info;
 }
 
@@ -168,7 +171,7 @@ linked_node* get_images(linked_node* source) {
 				break;
 			}
 			case(IMAGE): {
-				current = add_node_to_list(current, source->image);
+				current = add_node_to_list(current, strdup(source->image));
 
 				break;
 			}
@@ -180,10 +183,7 @@ linked_node* get_images(linked_node* source) {
 			break;
 			}
 		}
-		if (source->next != NULL) {
-			source = source->next;
-		}
-	} while (source->next != NULL);
+	} while ((source = source->next) != NULL);
 
 	if (entry_point->image == NULL) {
 		free(entry_point);
@@ -208,7 +208,22 @@ file_type get_file_type(const char* path) {
 		return DIRECTORY;
 	}
 
-	if (errno == ENOTDIR) {
+	if (errno == ENOENT) {
+		regex_t regex;
+		if (regcomp(&regex, "^\\(http\\|https\\|ftp\\):\\/\\/\\(www\\.\\)\\?[a-z0-9A-z\\.:]\\{2,256\\}", REG_ICASE) != 0) {
+			return ERROR;
+		}
+
+		if (regexec(&regex, path, 0, NULL, 0) == 0) {
+			regfree(&regex);
+			return IMAGE;
+		}
+
+		regfree(&regex);
+		
+		return ERROR;
+	}
+	else if (errno == ENOTDIR) {
 		return image_or_text(path);
 	}
 	else {
@@ -234,9 +249,7 @@ linked_node* list_files_full(const char* directory) {
 					char* real = realpath_wrap(d->d_name, directory);
 
 					if (real != NULL) {
-						if (strcmp(real, ".") != 0 || strcmp(real, "..") != 0) {
-							current = add_node_to_list(current, real);
-						}
+						current = add_node_to_list(current, real);
 					}
 				}
 			}
@@ -274,15 +287,6 @@ char* realpath_wrap(const char* path, const char* dir) {
 	snprintf(longer_path, count + 1U, "%s%s%s", dir, "/", path);
 
 	char* res = realpath(longer_path, NULL);
-
-	if (res != NULL) {
-		if (strcmp(res, ".") == 0) {
-			return NULL;
-		}
-		else if (strcmp(res, "..") == 0) {
-			return NULL;
-		}
-	}
 
 #if defined(PATH_MAX) && PATH_MAX > 0
 

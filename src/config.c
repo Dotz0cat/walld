@@ -100,7 +100,7 @@ linked_node* list_file_parse(const char* list_file) {
 		int count = config_setting_length(setting);
 
 		for (int i = 0; i < count; i++) {
-			char* item = config_setting_get_string_elem(setting, i);
+			char* item = strdup(config_setting_get_string_elem(setting, i));
 
 			current = add_node_to_list(current, item);
 		}
