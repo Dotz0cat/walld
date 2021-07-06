@@ -2,6 +2,7 @@
 #define __LIST_H__
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <time.h>
 
 typedef struct _linked_node linked_node;

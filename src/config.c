@@ -7,6 +7,11 @@ settings* read_config(const char* config_file, const char* home_dir) {
 	config_setting_t* setting;
 	const char* source;
 	int colors;
+	const char* bg_style;
+	const char* x_auth;
+	const char* display;
+	int minutes;
+	const char* feh_path;
 
 	config_init(&config);
 
@@ -22,12 +27,49 @@ settings* read_config(const char* config_file, const char* home_dir) {
 		options->colors = 0;
 	}
 
+	if (config_lookup_string(&config, "bg-style", &bg_style)) {
+		options->bg_style = strdup(bg_style);
+	}
+	else {
+		options->bg_style = "--bg-scale";
+	}
+
+	if (config_lookup_string(&config, "XAUTHORITY", &x_auth)) {
+		options->x_auth = strdup(x_auth);
+	}
+	else {
+		options->x_auth = NULL;
+	}
+
+	if (config_lookup_string(&config, "DISPLAY", &display)) {
+		options->display = strdup(display);
+	}
+	else {
+		options->display = NULL;
+	}
+
+	if (config_lookup_string(&config, "feh-path", &feh_path)) {
+		options->feh_path = strdup(feh_path);
+	}
+	else {
+		options->feh_path = "/usr/bin/feh";
+	}
+
+	if (config_lookup_int(&config, "minutes", &minutes)) {
+		options->minutes = minutes;
+	}
+	else {
+		options->minutes = 30;
+	}
+
 	if (config_lookup_string(&config, "source_to_use", &source)) {
 		//NOP
 	}
 	else {
 		source = "default";
 	}
+
+
 
 	setting = config_lookup(&config, source);
 

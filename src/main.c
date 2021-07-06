@@ -1,6 +1,11 @@
 #include "main.h"
 
 int main(int argc, char** argv) {
+
+	#ifdef DEBUG 
+	printf("debug in userland\r\n");
+	#endif
+
 	pre_init_stuff* info = pre_init();
 
 	printf("%s\n", info->home_dir);
@@ -8,6 +13,7 @@ int main(int argc, char** argv) {
 	printf("%s\n", info->options->sources->image);
 	printf("%s\n", info->picture_list->image);
 	printf("%s\n", ((linked_node* ) info->picture_list->next)->image);
+	printf("%s\n", ((linked_node* ) ((linked_node* ) info->picture_list->next)->next)->image);
 	//init_daemon();
 
 	// while(1) {
@@ -19,6 +25,13 @@ int main(int argc, char** argv) {
 
 	// syslog(LOG_NOTICE, "Walld has quit");
 	// closelog();
+
+	loop_context* context;
+	context = malloc(sizeof(loop_context));
+
+	context->info = info;
+
+	event_loop_run(context);
 
 	return EXIT_SUCCESS;
 }
@@ -79,6 +92,14 @@ static pre_init_stuff* pre_init(void) {
 
 	info->home_dir = home;
 
+	char* x_auth = strdup(getenv("XAUTHORITY"));
+
+	info->x_auth = x_auth;
+
+	char* display = strdup(getenv("DISPLAY"));
+
+	info->display = display;
+
 	int count = snprintf(NULL, 0, "%s%s", home, "/.walld/.walldrc");
 
 	if (count <= 0) {
@@ -96,6 +117,23 @@ static pre_init_stuff* pre_init(void) {
 	info->config = config_file;
 
 	info->options = read_config(config_file, home);
+
+	//config file takes piority over enviroment variables
+	if (info->options->x_auth != NULL) {
+		if (info->x_auth != NULL) {
+			free(x_auth);
+		}
+
+		info->x_auth = info->options->x_auth;
+	}
+
+	if (info->options->display != NULL) {
+		if (info->display != NULL) {
+			free(display);
+		}
+
+		info->display = info->options->display;
+	}
 
 	info->picture_list = get_images(info->options->sources);
 

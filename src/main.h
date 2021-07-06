@@ -18,20 +18,7 @@
 #include "config.h"
 #include "magic.h"
 #include "list.h"
-
-typedef struct _pre_init_stuff pre_init_stuff;
-
-struct _pre_init_stuff {
-
-	//store the home dir becuase once forked it will loose it
-	char* home_dir;
-
-	char* config;
-
-	settings* options;
-
-	linked_node* picture_list;
-};
+#include "loop.h"
 
 static void init_daemon(void);
 static pre_init_stuff* pre_init(void);

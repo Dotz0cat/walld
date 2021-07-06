@@ -12,6 +12,16 @@ typedef struct _settings settings;
 struct _settings {
 	int colors;
 
+	char* feh_path;
+
+	int minutes;
+
+	char* bg_style;
+
+	char* x_auth;
+
+	char* display;
+
 	linked_node* sources;
 };
 

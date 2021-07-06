@@ -55,9 +55,15 @@ void free_list(linked_node* head) {
 linked_node* shuffle(linked_node* head) {
 	int count = 0;
 	linked_node* count_head = head;
-	while ((count_head = count_head->next) != NULL) {
+	while (count_head != NULL) {
 		count++;
+		count_head = count_head->next;
 	}
+
+	#ifdef DEBUG 
+		fprintf(stderr, "count: %i\r\n", count);
+	#endif
+
 	linked_node** array = malloc(count * sizeof(linked_node*));
 
 	int i = 0;
@@ -71,6 +77,8 @@ linked_node* shuffle(linked_node* head) {
 
 	srand48(time(NULL));
 
+
+
 	for (int j = count - 1; j > 0; j--) {
 		int random = lrand48() % (j+1);
 
@@ -82,6 +90,8 @@ linked_node* shuffle(linked_node* head) {
 	}
 
 	linked_node* new_head = array[0];
+
+	array[count - 1]->next = new_head;
 
 	free(array);
 
