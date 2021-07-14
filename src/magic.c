@@ -17,12 +17,15 @@ file_type image_or_text(const char* path) {
 
 	image = ReadImage(info, exception);
 
-	if (exception->severity != UndefinedException) {
-		CatchException(exception);
-	}
+	// if (exception->severity != UndefinedException) {
+	// 	CatchException(exception);
+	// }
     
     if (image == (Image*) NULL) {
     	//cleanup
+    	info = DestroyImageInfo(info);
+    	exception = DestroyExceptionInfo(exception);
+    	MagickCoreTerminus();
     	return LIST;
     }
 

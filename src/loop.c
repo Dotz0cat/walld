@@ -19,6 +19,10 @@ int event_loop_run(loop_context* context) {
 		abort();
 	}
 
+	if (sigprocmask(SIG_BLOCK, &sigs, NULL) != 0) {
+		abort();
+	}
+
 	int sig_fd = signalfd(-1, &sigs, 0);
 
 	struct epoll_event signal_event;
@@ -34,10 +38,11 @@ int event_loop_run(loop_context* context) {
 
 	struct itimerspec timespec;
 
-	//120 seconds for testing. will make a context struct later that will set it
-	timespec.it_value.tv_sec = 60;
+	long seconds = context->info->options->minutes * 60;
+
+	timespec.it_value.tv_sec = seconds;
 	timespec.it_value.tv_nsec = 0;
-	timespec.it_interval.tv_sec = 60;
+	timespec.it_interval.tv_sec = seconds;
 	timespec.it_interval.tv_nsec = 0;
 
 	if (timerfd_settime(timer, 0, &timespec, NULL) != 0) {
@@ -61,6 +66,8 @@ int event_loop_run(loop_context* context) {
 	feh_exec(context->info->options->feh_path, context->info->options->bg_style, current->image, env);
 	current = current->next;
 
+	//signal(SIGHUP, SIG_IGN);
+
 	int running = 0;
 
 	struct epoll_event events[3];
@@ -80,6 +87,29 @@ int event_loop_run(loop_context* context) {
 
 				if (fdsi.ssi_signo == SIGHUP) {
 					//regen config
+					context->info = regen_config(context->info);
+
+					seconds = context->info->options->minutes * 60;
+
+					timespec.it_value.tv_sec = seconds;
+					timespec.it_value.tv_nsec = 0;
+					timespec.it_interval.tv_sec = seconds;
+					timespec.it_interval.tv_nsec = 0;
+
+					if (timerfd_settime(timer, 0, &timespec, NULL) != 0) {
+						abort();
+					}
+
+					free_env(env);
+
+					env = prep_enviroment(context->info->display, context->info->x_auth, context->info->home_dir);
+
+					current = context->info->picture_list;
+
+					feh_exec(context->info->options->feh_path, context->info->options->bg_style, current->image, env);
+					current = current->next;
+
+					fprintf(stderr, "sighup had been handled\r\n");
 				}
 			}
 			else if (events[i].data.fd == timer) {
@@ -89,7 +119,7 @@ int event_loop_run(loop_context* context) {
 
 				uint64_t expires;
 				read(events[i].data.fd, &expires, sizeof(uint64_t));
-				if (expires >= 1) {
+				if (expires > 0) {
 					feh_exec(context->info->options->feh_path, context->info->options->bg_style, current->image, env);
 					current = current->next;
 				}
@@ -225,4 +255,71 @@ char** prep_enviroment(const char* display, const char* x_auth, const char* home
 	env[index] = NULL;
 
 	return env;
+}
+
+pre_init_stuff* regen_config(pre_init_stuff* info) {
+	//free the old options
+
+	if (info->options != NULL) {
+		if (info->options->feh_path != NULL) {
+			free(info->options->feh_path);
+		}
+
+		if (info->options->bg_style != NULL) {
+			free(info->options->bg_style);
+		}
+
+		if (info->options->x_auth != NULL) {
+			free(info->options->x_auth);
+		}
+
+		if (info->options->display != NULL) {
+			free(info->options->display);
+		}
+
+		if (info->options->sources != NULL) {
+			free_list(info->options->sources);
+		}
+
+		free(info->options);
+	}
+
+	info->options = read_config(info->config, info->home_dir);
+
+	if (info->options->x_auth != NULL) {
+		if (info->x_auth != NULL) {
+			free(info->x_auth);
+		}
+
+		info->x_auth = info->options->x_auth;
+	}
+
+	if (info->options->display != NULL) {
+		if (info->display != NULL) {
+			free(info->display);
+		}
+
+		info->display = info->options->display;
+	}
+
+	info->picture_list = get_images(info->options->sources);
+
+	if (info->picture_list == NULL) {
+		abort();
+	}
+
+	info->picture_list = shuffle(info->picture_list);
+
+	return info;
+}
+
+void free_env(char** env) {
+	if (env != NULL) {
+		size_t env_len = sizeof(env) / sizeof(*env);
+		for (size_t i = 0; i < env_len; i++) {
+			if (env[i] != NULL) {
+				free(env[i]);
+			}
+		}
+	}
 }
