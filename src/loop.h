@@ -7,6 +7,7 @@
 #include <signal.h>
 #include <sys/signalfd.h>
 #include <sys/timerfd.h>
+#include <errno.h>
 
 #include "config.h"
 #include "list.h"
@@ -33,6 +34,8 @@ typedef struct _loop_context loop_context;
 
 struct _loop_context {
 	pre_init_stuff* info;
+
+	sigset_t sigs;
 };
 
 int event_loop_run(loop_context* context);

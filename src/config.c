@@ -31,7 +31,7 @@ settings* read_config(const char* config_file, const char* home_dir) {
 		options->bg_style = strdup(bg_style);
 	}
 	else {
-		options->bg_style = "--bg-scale";
+		options->bg_style = strdup("--bg-scale");
 	}
 
 	if (config_lookup_string(&config, "XAUTHORITY", &x_auth)) {
@@ -52,7 +52,7 @@ settings* read_config(const char* config_file, const char* home_dir) {
 		options->feh_path = strdup(feh_path);
 	}
 	else {
-		options->feh_path = "/usr/bin/feh";
+		options->feh_path = strdup("/usr/bin/feh");
 	}
 
 	if (config_lookup_int(&config, "minutes", &minutes)) {

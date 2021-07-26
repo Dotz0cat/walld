@@ -2,18 +2,29 @@
 
 int main(int argc, char** argv) {
 
-	#ifdef DEBUG 
-	printf("debug in userland\r\n");
-	#endif
+	signal(SIGHUP, SIG_IGN);
+	signal(SIGUSR1, SIG_IGN);
+
+	sigset_t sigs;
+
+	if (sigemptyset(&sigs) != 0) {
+		abort();
+	}
+
+	if (sigaddset(&sigs, SIGHUP) != 0) {
+		abort();
+	}
+
+	if (sigaddset(&sigs, SIGUSR1) != 0) {
+		abort();
+	}
+
+	if (sigprocmask(SIG_BLOCK, &sigs, NULL) != 0) {
+		abort();
+	}
 
 	pre_init_stuff* info = pre_init();
 
-	printf("%s\n", info->home_dir);
-	printf("%s\n", info->config);
-	printf("%s\n", info->options->sources->image);
-	printf("%s\n", info->picture_list->image);
-	printf("%s\n", ((linked_node* ) info->picture_list->next)->image);
-	printf("%s\n", ((linked_node* ) ((linked_node* ) info->picture_list->next)->next)->image);
 	//init_daemon();
 
 	// while(1) {
@@ -30,6 +41,8 @@ int main(int argc, char** argv) {
 	context = malloc(sizeof(loop_context));
 
 	context->info = info;
+
+	context->sigs = sigs;
 
 	event_loop_run(context);
 

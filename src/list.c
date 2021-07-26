@@ -60,10 +60,6 @@ linked_node* shuffle(linked_node* head) {
 		count_head = count_head->next;
 	}
 
-	#ifdef DEBUG 
-		fprintf(stderr, "count: %i\r\n", count);
-	#endif
-
 	linked_node** array = malloc(count * sizeof(linked_node*));
 
 	int i = 0;

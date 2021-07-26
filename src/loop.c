@@ -3,27 +3,15 @@
 int event_loop_run(loop_context* context) {
 	linked_node* current = context->info->picture_list;
 
-	int efd = epoll_create1(0);
+	int efd = epoll_create1(EPOLL_CLOEXEC);
 
 	if (efd <=0) {
 		abort();
 	}
 
-	sigset_t sigs;
+	int sig_fd = signalfd(-1, &context->sigs, SFD_CLOEXEC);
 
-	if (sigemptyset(&sigs) != 0) {
-		abort();
-	}
-
-	if (sigaddset(&sigs, SIGHUP) != 0) {
-		abort();
-	}
-
-	if (sigprocmask(SIG_BLOCK, &sigs, NULL) != 0) {
-		abort();
-	}
-
-	int sig_fd = signalfd(-1, &sigs, 0);
+	//fcntl(sig_fd, O_NONBLOCK);
 
 	struct epoll_event signal_event;
 	signal_event.events = EPOLLIN;
@@ -34,7 +22,7 @@ int event_loop_run(loop_context* context) {
 		abort();
 	}
 
-	int timer = timerfd_create(CLOCK_MONOTONIC, 0);
+	int timer = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC);
 
 	struct itimerspec timespec;
 
@@ -70,22 +58,28 @@ int event_loop_run(loop_context* context) {
 
 	int running = 0;
 
-	struct epoll_event events[3];
+	struct epoll_event events[1];
 
 	while(running == 0) {
 		//things
-		int num_of_events = epoll_wait(efd, events, 3, 10000);
+		int num_of_events = epoll_wait(efd, events, 1, 10000);
 
 		for (int i = 0; i < num_of_events; i++) {
 			if (events[i].data.fd == sig_fd) {
-				struct signalfd_siginfo fdsi;
-				int bytes_read = read(events[i].data.fd, &fdsi, sizeof(fdsi));
+				struct signalfd_siginfo* fdsi;
+				fdsi = malloc(sizeof(struct signalfd_siginfo));
+				int bytes_read = 0;
+				fprintf(stderr, "about to read\r\n");
+				bytes_read = read(events[i].data.fd, fdsi, sizeof(struct signalfd_siginfo));
+				fprintf(stderr, "done reading\r\n");
 
-				if (bytes_read == 0) {
+				fprintf(stderr, "bytes_read: %i\r\n", bytes_read);
+				if (bytes_read < 0) {
 					//not valid read
 				}
 
-				if (fdsi.ssi_signo == SIGHUP) {
+				if (fdsi->ssi_signo == SIGHUP) {
+
 					//regen config
 					context->info = regen_config(context->info);
 
@@ -109,13 +103,16 @@ int event_loop_run(loop_context* context) {
 					feh_exec(context->info->options->feh_path, context->info->options->bg_style, current->image, env);
 					current = current->next;
 
-					fprintf(stderr, "sighup had been handled\r\n");
 				}
+				else if (fdsi->ssi_signo == SIGUSR1) {
+					//skip ahead
+					feh_exec(context->info->options->feh_path, context->info->options->bg_style, current->image, env);
+					current = current->next;
+				}
+
+				free(fdsi);
 			}
 			else if (events[i].data.fd == timer) {
-				#ifdef DEBUG
-				fprintf(stderr, "timer expired\r\n");
-				#endif
 
 				uint64_t expires;
 				read(events[i].data.fd, &expires, sizeof(uint64_t));
@@ -131,11 +128,6 @@ int event_loop_run(loop_context* context) {
 }
 
 static inline void feh_exec(const char* path, const char* bg_style, const char* image, char** env) {
-
-#ifdef DEBUG
-	fprintf(stderr, "feh exec fired\r\n");
-	fprintf(stderr, "path: %s\r\nbg: %s\r\nimage: %s\r\n", path, bg_style, image);
-#endif
 
 	pid_t feh_pid;
 
@@ -192,10 +184,6 @@ char** prep_enviroment(const char* display, const char* x_auth, const char* home
 
 		env[index] = display_string;
 
-		#ifdef DEBUG
-		fprintf(stderr, "display: %s\r\n", display_string);
-		#endif
-
 		index++;
 	}
 	else {
@@ -221,10 +209,6 @@ char** prep_enviroment(const char* display, const char* x_auth, const char* home
 
 		env[index] = x_auth_string;
 
-		#ifdef DEBUG
-		fprintf(stderr, "x_auth: %s\r\n", x_auth_string);
-		#endif
-
 		index++;
 	}
 
@@ -244,10 +228,6 @@ char** prep_enviroment(const char* display, const char* x_auth, const char* home
 		snprintf(home_string, len + 1U, "%s%s", "HOME=", home);
 
 		env[index] = home_string;
-
-		#ifdef DEBUG
-		fprintf(stderr, "home: %s\r\n", home_string);
-		#endif
 
 		index++;
 	}
@@ -315,7 +295,8 @@ pre_init_stuff* regen_config(pre_init_stuff* info) {
 
 void free_env(char** env) {
 	if (env != NULL) {
-		size_t env_len = sizeof(env) / sizeof(*env);
+		//size_t env_len = sizeof(env) / sizeof(*env);
+		size_t env_len = (&env)[0] - env;
 		for (size_t i = 0; i < env_len; i++) {
 			if (env[i] != NULL) {
 				free(env[i]);
