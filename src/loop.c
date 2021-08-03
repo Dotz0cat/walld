@@ -69,16 +69,15 @@ int event_loop_run(loop_context* context) {
 				struct signalfd_siginfo* fdsi;
 				fdsi = malloc(sizeof(struct signalfd_siginfo));
 				int bytes_read = 0;
-				fprintf(stderr, "about to read\r\n");
 				bytes_read = read(events[i].data.fd, fdsi, sizeof(struct signalfd_siginfo));
-				fprintf(stderr, "done reading\r\n");
 
-				fprintf(stderr, "bytes_read: %i\r\n", bytes_read);
 				if (bytes_read < 0) {
 					//not valid read
 				}
 
 				if (fdsi->ssi_signo == SIGHUP) {
+
+					syslog(LOG_NOTICE, "SIGHUP has been recived: regening config");
 
 					//regen config
 					context->info = regen_config(context->info);
@@ -103,9 +102,20 @@ int event_loop_run(loop_context* context) {
 					feh_exec(context->info->options->feh_path, context->info->options->bg_style, current->image, env);
 					current = current->next;
 
+					syslog(LOG_NOTICE, "config regened");
+
 				}
 				else if (fdsi->ssi_signo == SIGUSR1) {
+					syslog(LOG_NOTICE, "SIGUSR1 has been recived: skiping ahead");
 					//skip ahead
+					feh_exec(context->info->options->feh_path, context->info->options->bg_style, current->image, env);
+					current = current->next;
+				}
+				else if (fdsi->ssi_signo == SIGUSR2) {
+					//re shuffle the picture list
+					syslog(LOG_NOTICE, "SIGUSR2 has been recived: reshuffling picture list");
+					current = shuffle(current);
+
 					feh_exec(context->info->options->feh_path, context->info->options->bg_style, current->image, env);
 					current = current->next;
 				}

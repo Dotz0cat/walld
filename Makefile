@@ -5,8 +5,8 @@ LDLIBS= $(shell pkg-config --libs libconfig MagickWand)
 SRCDIR= src
 OBJDIR= obj
 
-build: $(OBJDIR) $(OBJDIR)/main.o $(OBJDIR)/config.o $(OBJDIR)/magic.o $(OBJDIR)/list.o
-	@$(CC) $(CFLAGS) $(CPPFLAGS) $(OBJDIR)/main.o $(OBJDIR)/config.o $(OBJDIR)/magic.o $(OBJDIR)/list.o -o walld $(LDLIBS) $(LDFLAGS)
+build: $(OBJDIR) $(OBJDIR)/main.o $(OBJDIR)/config.o $(OBJDIR)/magic.o $(OBJDIR)/list.o $(OBJDIR)/loop.o
+	@$(CC) $(CFLAGS) $(CPPFLAGS) $(OBJDIR)/main.o $(OBJDIR)/config.o $(OBJDIR)/magic.o $(OBJDIR)/list.o $(OBJDIR)/loop.o -o walld $(LDLIBS) $(LDFLAGS)
 
 $(OBJDIR):
 	@mkdir $(OBJDIR)
@@ -23,6 +23,9 @@ $(OBJDIR)/magic.o: $(SRCDIR)/magic.h $(SRCDIR)/magic.c
 $(OBJDIR)/list.o: $(SRCDIR)/list.h $(SRCDIR)/list.c
 	@$(CC) $(CFLAGS) $(CPPFLAGS) -c $(SRCDIR)/list.c -o $(OBJDIR)/list.o
 
+$(OBJDIR)/loop.o: $(SRCDIR)/loop.h $(SRCDIR)/loop.c
+	@$(CC) $(CFLAGS) $(CPPFLAGS) -c $(SRCDIR)/loop.c -o $(OBJDIR)/loop.o
+
 .PHONEY: clean
 
 clean:
@@ -30,5 +33,6 @@ clean:
 	@-rm $(OBJDIR)/config.o 
 	@-rm $(OBJDIR)/magic.o 
 	@-rm $(OBJDIR)/list.o
+	@-rm $(OBJDIR)/loop.o
 	@-rmdir $(OBJDIR)
 	@-rm walld

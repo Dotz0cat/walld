@@ -7,7 +7,7 @@ file_type image_or_text(const char* path) {
 
 	ExceptionInfo* exception;
 
-	MagickCoreGenesis(path, MagickFalse);
+	//MagickCoreGenesis(NULL, MagickFalse);
 
 	exception = AcquireExceptionInfo();
 
@@ -25,13 +25,26 @@ file_type image_or_text(const char* path) {
     	//cleanup
     	info = DestroyImageInfo(info);
     	exception = DestroyExceptionInfo(exception);
-    	MagickCoreTerminus();
+    	//MagickCoreTerminus();
     	return LIST;
     }
 
     DestroyImage(image);
     info = DestroyImageInfo(info);
     exception = DestroyExceptionInfo(exception);
-    MagickCoreTerminus();
+    //MagickCoreTerminus();
     return IMAGE;
+}
+
+void magick_start(const char* argv1) {
+	MagickCoreGenesis(argv1, MagickFalse);
+}
+
+void magick_stop(void) {
+	//RelinquishMagickResource(ThreadResource, 1);
+	MagickCoreTerminus();
+}
+
+void magick_threads(const int threads) {
+	SetMagickResourceLimit(ThreadResource, threads);
 }

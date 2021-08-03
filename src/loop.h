@@ -8,6 +8,7 @@
 #include <sys/signalfd.h>
 #include <sys/timerfd.h>
 #include <errno.h>
+#include <syslog.h>
 
 #include "config.h"
 #include "list.h"

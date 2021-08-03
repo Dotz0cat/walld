@@ -2,8 +2,15 @@
 
 int main(int argc, char** argv) {
 
+	//set enviroment variable to fix segfault when linked against clang's openmp
+	#ifdef __clang__
+	setenv("KMP_LOCK_KIND", "futex", 1);
+	#endif
+
 	signal(SIGHUP, SIG_IGN);
+	signal(SIGCHLD, SIG_IGN);
 	signal(SIGUSR1, SIG_IGN);
+	signal(SIGUSR2, SIG_IGN);
 
 	sigset_t sigs;
 
@@ -19,23 +26,29 @@ int main(int argc, char** argv) {
 		abort();
 	}
 
+	if (sigaddset(&sigs, SIGUSR2) != 0) {
+		abort();
+	}
+
 	if (sigprocmask(SIG_BLOCK, &sigs, NULL) != 0) {
 		abort();
 	}
 
+	magick_start(argv[1]);
+	magick_threads(1);
+
 	pre_init_stuff* info = pre_init();
 
-	//init_daemon();
+	//magick_stop();
 
-	// while(1) {
-	// 	//stuff
-	// 	syslog(LOG_NOTICE, "Walld is started");
-	// 	sleep(20);
-	// 	break;
-	// }
+	init_daemon();
 
-	// syslog(LOG_NOTICE, "Walld has quit");
-	// closelog();
+	syslog(LOG_NOTICE, "Walld is inited");
+
+	//magick_start(argv[1], 4);
+	///syslog(LOG_NOTICE, "magick core is inited");
+
+	magick_threads(4);
 
 	loop_context* context;
 	context = malloc(sizeof(loop_context));
@@ -44,7 +57,13 @@ int main(int argc, char** argv) {
 
 	context->sigs = sigs;
 
+	syslog(LOG_NOTICE, "Walld is started");
+
 	event_loop_run(context);
+
+	syslog(LOG_NOTICE, "Walld has quit");
+
+	closelog();
 
 	return EXIT_SUCCESS;
 }
@@ -87,6 +106,9 @@ static void init_daemon() {
 	for (x = sysconf(_SC_OPEN_MAX); x>=0; x--) {
 		close(x);
 	}
+
+	stdout = fopen("/home/seth/.walld/log", "w");
+	stderr = stdout;
 
 	openlog("walld", LOG_PID, LOG_DAEMON);
 }

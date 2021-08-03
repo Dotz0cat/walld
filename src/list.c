@@ -55,10 +55,10 @@ void free_list(linked_node* head) {
 linked_node* shuffle(linked_node* head) {
 	int count = 0;
 	linked_node* count_head = head;
-	while (count_head != NULL) {
+	do {
 		count++;
 		count_head = count_head->next;
-	}
+	} while (count_head != NULL && count_head != head);
 
 	linked_node** array = malloc(count * sizeof(linked_node*));
 
@@ -309,4 +309,18 @@ char* realpath_wrap(const char* path, const char* dir) {
 	free(longer_path);
 
 	return res;
+}
+
+int is_circluar(linked_node* head) {
+	if (head == NULL) {
+		return 1;
+	}
+
+	linked_node* temp = head;
+
+	while (temp != NULL || temp != head) {
+		temp = temp->next;
+	}
+
+	return (temp == head);
 }

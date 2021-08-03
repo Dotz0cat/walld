@@ -15,5 +15,8 @@ enum _file_type {
 };
 
 file_type image_or_text(const char* path);
+void magick_start(const char* argv1);
+void magick_stop(void);
+void magick_threads(const int threads);
 
 #endif /* __MAGIC_H__*/
