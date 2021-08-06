@@ -1,3 +1,22 @@
+/*
+Copyright 2021 Dotz0cat
+
+This file is part of walld.
+
+    walld is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    walld is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with walld.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 #include "config.h"
 
 settings* read_config(const char* config_file, const char* home_dir) {
@@ -13,11 +32,43 @@ settings* read_config(const char* config_file, const char* home_dir) {
 	int minutes;
 	const char* feh_path;
 
+	//check if file exsits
+	if (file_exsits(config_file) != 0) {
+
+		int char_count = snprintf(NULL, 0, "%s%s", home_dir, "/.walld");
+		if (char_count <= 0) {
+			//tough luck
+			abort();
+		}
+		char* walld_folder = malloc(char_count + 1U);
+
+		if (walld_folder == NULL) {
+			//tough luck
+			abort();
+		}
+
+		snprintf(walld_folder, char_count + 1U, "%s%s", home_dir, "/.walld");
+
+		if (folder_exsits(walld_folder) != 0) {
+			if (mkdir(walld_folder, 0777) == -1) {
+				abort();
+			}
+		}
+
+		free(walld_folder);
+
+		produce_default_config(config_file, home_dir);
+	}
+
+	check_default_image_folder(home_dir);
+
 	config_init(&config);
 
 	if (config_read_file(&config, config_file) != CONFIG_TRUE) {
+		free(options);
 		config_destroy(&config);
-		return NULL;
+		produce_default_config(config_file, home_dir);
+		return read_config(config_file, home_dir);
 	}
 
 	if (config_lookup_bool(&config, "colors", &colors)) {
@@ -156,4 +207,110 @@ linked_node* list_file_parse(const char* list_file) {
 	config_destroy(&config);
 
 	return entry_point;
+}
+
+void produce_default_config(const char* output_file, const char* home_dir) {
+	config_t cfg;
+
+	config_init(&cfg);
+
+	config_setting_t* root;
+
+	root = config_root_setting(&cfg);
+
+	config_setting_t* colors;
+
+	colors = config_setting_add(root, "colors", CONFIG_TYPE_BOOL);
+	config_setting_set_bool(colors, CONFIG_TRUE);
+
+	config_setting_t* minutes;
+
+	minutes = config_setting_add(root, "minutes", CONFIG_TYPE_INT);
+	config_setting_set_int(minutes, 30);
+
+	config_setting_t* source;
+
+	source = config_setting_add(root, "source_to_use", CONFIG_TYPE_STRING);
+	config_setting_set_string(source, "default");
+
+	config_setting_t* default_source;
+
+	default_source = config_setting_add(root, "default", CONFIG_TYPE_ARRAY);
+
+	//make a string
+	int char_count = snprintf(NULL, 0, "%s%s", home_dir, "/.walld/images");
+	if (char_count <= 0) {
+		//tough luck
+		abort();
+	}
+	char* default_folder = malloc(char_count + 1U);
+
+	if (default_folder == NULL) {
+		//tough luck
+		abort();
+	}
+
+	snprintf(default_folder, char_count + 1U, "%s%s", home_dir, "/.walld/images");
+
+	config_setting_t* array;
+
+	array = config_setting_add(default_source, NULL, CONFIG_TYPE_STRING);
+	config_setting_set_string(array, default_folder);
+
+	if (config_write_file(&cfg, output_file) != CONFIG_TRUE) {
+		//if this fails I cannot help you
+		abort();
+	}
+
+	config_destroy(&cfg);
+	free(default_folder);
+}
+
+//0 if exsits 1 if not
+static inline int file_exsits(const char* file) {
+	FILE* fp;
+
+	if ((fp = fopen(file, "r"))) {
+		fclose(fp);
+		return 0;
+	}
+	else {
+		return 1;
+	}
+}
+
+static inline int folder_exsits(const char* folder) {
+	DIR* dir;
+
+	dir = opendir(folder);
+
+	if (dir) {
+		closedir(dir);
+		return 0;
+	}
+	else {
+		return 1;
+	}
+}
+
+static inline void check_default_image_folder(const char* home_dir) {
+	int image_folder_char_count = snprintf(NULL, 0, "%s%s", home_dir, "/.walld/images");
+	if (image_folder_char_count <= 0) {
+		//tough luck
+		abort();
+	}
+	char* default_image_folder = malloc(image_folder_char_count + 1U);
+
+	if (default_image_folder == NULL) {
+		//tough luck
+		abort();
+	}
+
+	snprintf(default_image_folder, image_folder_char_count + 1U, "%s%s", home_dir, "/.walld/images");
+
+	if (folder_exsits(default_image_folder) != 0) {
+		mkdir(default_image_folder, 0777);
+	}
+
+	free(default_image_folder);
 }

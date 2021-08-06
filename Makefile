@@ -4,6 +4,7 @@ LDLIBS= $(shell pkg-config --libs libconfig MagickWand)
 
 SRCDIR= src
 OBJDIR= obj
+PREFIX?= /usr/local
 
 build: $(OBJDIR) $(OBJDIR)/main.o $(OBJDIR)/config.o $(OBJDIR)/magic.o $(OBJDIR)/list.o $(OBJDIR)/loop.o
 	@$(CC) $(CFLAGS) $(CPPFLAGS) $(OBJDIR)/main.o $(OBJDIR)/config.o $(OBJDIR)/magic.o $(OBJDIR)/list.o $(OBJDIR)/loop.o -o walld $(LDLIBS) $(LDFLAGS)
@@ -36,3 +37,13 @@ clean:
 	@-rm $(OBJDIR)/loop.o
 	@-rmdir $(OBJDIR)
 	@-rm walld
+
+.PHONEY: install
+
+install: build
+	@install -D walld -t ${DESTDIR}${PREFIX}/bin
+
+.PHONY: uninstall
+
+uninstall: 
+	@rm -f ${DESTDIR}${PREFIX}/bin/walld
