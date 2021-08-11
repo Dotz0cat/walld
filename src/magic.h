@@ -23,6 +23,8 @@ This file is part of walld.
 #include <ImageMagick-7/MagickCore/MagickCore.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+#include <math.h>
 
 typedef enum _file_type file_type;
 
@@ -33,9 +35,34 @@ enum _file_type {
 	ERROR
 };
 
+typedef struct _hsl hsl;
+
+struct _hsl {
+	int h;
+	float s;
+	float l;
+};
+
+typedef struct _rgb rgb;
+
+struct _rgb {
+	unsigned int r;
+	unsigned int g;
+	unsigned int b;
+};
+
 file_type image_or_text(const char* path);
 void magick_start(const char* argv1);
 void magick_stop(void);
 void magick_threads(const int threads);
+char** get_colors(const char* path, int num_of_colors, size_t* actual_colors);
+void put_colors_in_file(const char* home_dir, const char* image, int dark);
+rgb* hex_to_rgb(const char* hex_string);
+hsl* rgb_to_hsl(const rgb* color);
+rgb* hsl_to_rgb(const hsl* color);
+char* rgb_to_hex(const rgb* color);
+void lighten_rgb(rgb* color, float factor);
+void darken_rgb(rgb* color, float factor);
+rgb* blend_colors(rgb* color1, rgb* color2);
 
 #endif /* __MAGIC_H__*/

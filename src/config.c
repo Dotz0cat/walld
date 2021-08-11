@@ -26,11 +26,14 @@ settings* read_config(const char* config_file, const char* home_dir) {
 	config_setting_t* setting;
 	const char* source;
 	int colors;
+	int dark;
 	const char* bg_style;
 	const char* x_auth;
 	const char* display;
 	int minutes;
 	const char* feh_path;
+	const char* xrdb_path;
+	const char* xresources;
 
 	//check if file exsits
 	if (file_exsits(config_file) != 0) {
@@ -67,8 +70,7 @@ settings* read_config(const char* config_file, const char* home_dir) {
 	if (config_read_file(&config, config_file) != CONFIG_TRUE) {
 		free(options);
 		config_destroy(&config);
-		produce_default_config(config_file, home_dir);
-		return read_config(config_file, home_dir);
+		return NULL;
 	}
 
 	if (config_lookup_bool(&config, "colors", &colors)) {
@@ -76,6 +78,13 @@ settings* read_config(const char* config_file, const char* home_dir) {
 	}
 	else {
 		options->colors = 0;
+	}
+
+	if (config_lookup_bool(&config, "dark", &dark)) {
+		options->dark = dark;
+	}
+	else {
+		options->dark = 0;
 	}
 
 	if (config_lookup_string(&config, "bg-style", &bg_style)) {
@@ -120,8 +129,6 @@ settings* read_config(const char* config_file, const char* home_dir) {
 		source = "default";
 	}
 
-
-
 	setting = config_lookup(&config, source);
 
 	if (setting != NULL) {
@@ -157,6 +164,60 @@ settings* read_config(const char* config_file, const char* home_dir) {
 		snprintf(default_folder, char_count + 1U, "%s%s", home_dir, "/.walld/images");
 
 		options->sources = add_node_to_list(options->sources, default_folder);
+	}
+
+	if (config_lookup_string(&config, "xrdb-path", &xrdb_path)) {
+		options->xrdb_path = strdup(xrdb_path);
+	}
+	else {
+		options->xrdb_path = strdup("/usr/bin/xrdb");
+	}
+
+	config_setting_t* xrdb_args;
+
+	linked_node* entry_point = add_node_to_list(NULL, NULL);
+
+	linked_node* current = entry_point;
+
+	options->xrdb_argv = entry_point;
+
+	xrdb_args = config_lookup(&config, "xrdb-args");
+
+	if (xrdb_args != NULL) {
+		int count = config_setting_length(xrdb_args);
+
+		for (int i = 0; i < count; i++) {
+			char* item = strdup(config_setting_get_string_elem(setting, i));
+
+			current = add_node_to_list(current, item);
+		}
+	}
+	else {
+
+		current = add_node_to_list(current, strdup("--load"));
+	}
+
+	//xresources
+
+	if (config_lookup_string(&config, "xresources", &xresources)) {
+		current = add_node_to_list(current, strdup(xresources));
+	}
+	else {
+		int char_count = snprintf(NULL, 0, "%s%s", home_dir, "/.Xresources");
+		if (char_count <= 0) {
+			//tough luck
+			abort();
+		}
+		char* xres = malloc(char_count + 1U);
+
+		if (xres == NULL) {
+			//tough luck
+			abort();
+		}
+
+		snprintf(xres, char_count + 1U, "%s%s", home_dir, "/.Xresources");
+
+		current = add_node_to_list(current, xres);
 	}
 
 	config_destroy(&config);
@@ -221,7 +282,12 @@ void produce_default_config(const char* output_file, const char* home_dir) {
 	config_setting_t* colors;
 
 	colors = config_setting_add(root, "colors", CONFIG_TYPE_BOOL);
-	config_setting_set_bool(colors, CONFIG_TRUE);
+	config_setting_set_bool(colors, CONFIG_FALSE);
+
+	config_setting_t* dark;
+
+	dark = config_setting_add(root, "dark", CONFIG_TYPE_BOOL);
+	config_setting_set_bool(dark, CONFIG_TRUE);
 
 	config_setting_t* minutes;
 

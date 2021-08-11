@@ -32,7 +32,11 @@ typedef struct _settings settings;
 struct _settings {
 	int colors;
 
+	int dark;
+
 	char* feh_path;
+
+	char* xrdb_path;
 
 	int minutes;
 
@@ -43,6 +47,8 @@ struct _settings {
 	char* display;
 
 	linked_node* sources;
+
+	linked_node* xrdb_argv;
 };
 
 settings* read_config(const char* config_file, const char* home_dir);

@@ -50,6 +50,7 @@ linked_node* get_images(linked_node* source);
 file_type get_file_type(const char* path);
 linked_node* list_files_full(const char* directory);
 char* realpath_wrap(const char* path, const char* dir);
+char** list_to_null_termed_string_array(linked_node* head);
 
 #include "config.h"
 

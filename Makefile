@@ -1,6 +1,6 @@
-CFLAGS?= -O2 -g -Wall -Wextra -Wshadow
+CFLAGS?= -O2 -g
 CPPFLAGS= $(shell pkg-config --cflags libconfig MagickWand)
-LDLIBS= $(shell pkg-config --libs libconfig MagickWand)
+LDLIBS= $(shell pkg-config --libs libconfig MagickWand) -lm
 
 SRCDIR= src
 OBJDIR= obj

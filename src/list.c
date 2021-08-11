@@ -194,9 +194,6 @@ linked_node* get_images(linked_node* source) {
 			}
 			case(ERROR):
 			default: {
-			//give error
-			//do nothing
-			//just dont add it
 			break;
 			}
 		}
@@ -330,16 +327,26 @@ char* realpath_wrap(const char* path, const char* dir) {
 	return res;
 }
 
-int is_circluar(linked_node* head) {
-	if (head == NULL) {
-		return 1;
+char** list_to_null_termed_string_array(linked_node* head) {
+	int count = 0;
+	linked_node* count_head = head;
+	do {
+		count++;
+		count_head = count_head->next;
+	} while (count_head != NULL && count_head != head);
+
+	char** array = malloc((count * sizeof(char*)) + 1);
+
+	int i = 0;
+
+	linked_node* add_head = head;
+
+	for (i = 0; i < count; i++) {
+		array[i] = strdup(add_head->image);
+		add_head = add_head->next;
 	}
 
-	linked_node* temp = head;
+	array[count + 1] = NULL;
 
-	while (temp != NULL || temp != head) {
-		temp = temp->next;
-	}
-
-	return (temp == head);
+	return array;
 }

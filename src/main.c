@@ -31,6 +31,10 @@ int main(int argc, char** argv) {
 	signal(SIGUSR1, SIG_IGN);
 	signal(SIGUSR2, SIG_IGN);
 
+	signal(SIGTERM, SIG_IGN);
+	signal(SIGQUIT, SIG_IGN);
+	signal(SIGINT, SIG_IGN);
+
 	sigset_t sigs;
 
 	if (sigemptyset(&sigs) != 0) {
@@ -49,6 +53,18 @@ int main(int argc, char** argv) {
 		abort();
 	}
 
+	if (sigaddset(&sigs, SIGTERM) != 0) {
+		abort();
+	}
+
+	if (sigaddset(&sigs, SIGQUIT) != 0) {
+		abort();
+	}
+
+	if (sigaddset(&sigs, SIGINT) != 0) {
+		abort();
+	}
+
 	if (sigprocmask(SIG_BLOCK, &sigs, NULL) != 0) {
 		abort();
 	}
@@ -58,14 +74,11 @@ int main(int argc, char** argv) {
 
 	pre_init_stuff* info = pre_init();
 
-	//magick_stop();
-
 	init_daemon();
 
 	syslog(LOG_NOTICE, "Walld is inited");
 
-	//magick_start(argv[1], 4);
-	///syslog(LOG_NOTICE, "magick core is inited");
+	fprintf(stderr, "this is stderr");
 
 	magick_threads(4);
 
@@ -80,9 +93,27 @@ int main(int argc, char** argv) {
 
 	event_loop_run(context);
 
+	free_list(info->options->sources);
+	free(info->options->feh_path);
+	free(info->options->bg_style);
+	free(info->options->x_auth);
+	free(info->options->display);
+	free(info->options);
+
+	free(info->home_dir);
+	free(info->x_auth);
+	free(info->display);
+	free(info->config);
+	free_list(info->picture_list);
+	free(info);
+
+	free(context);
+
 	syslog(LOG_NOTICE, "Walld has quit");
 
 	closelog();
+
+	magick_stop();
 
 	return EXIT_SUCCESS;
 }

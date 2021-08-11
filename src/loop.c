@@ -30,13 +30,12 @@ int event_loop_run(loop_context* context) {
 
 	int sig_fd = signalfd(-1, &context->sigs, SFD_CLOEXEC);
 
-	//fcntl(sig_fd, O_NONBLOCK);
-
 	struct epoll_event signal_event;
 	signal_event.events = EPOLLIN;
 	signal_event.data.fd = sig_fd;
 
 	if (epoll_ctl(efd, EPOLL_CTL_ADD, sig_fd, &signal_event) != 0) {
+		close(sig_fd);
 		close(efd);
 		abort();
 	}
@@ -53,6 +52,7 @@ int event_loop_run(loop_context* context) {
 	timespec.it_interval.tv_nsec = 0;
 
 	if (timerfd_settime(timer, 0, &timespec, NULL) != 0) {
+		close(sig_fd);
 		close(efd);
 		close(timer);
 		abort();
@@ -63,17 +63,22 @@ int event_loop_run(loop_context* context) {
 	timer_event.data.fd = timer;
 
 	if (epoll_ctl(efd, EPOLL_CTL_ADD, timer, &timer_event) != 0) {
+		close(sig_fd);
 		close(efd);
 		close(timer);
 		abort();
 	}
 
 	char** env = prep_enviroment(context->info->display, context->info->x_auth, context->info->home_dir);
+	char** xrdb_argv = prep_xrdb_argv(context->info->options->xrdb_argv);
 
 	feh_exec(context->info->options->feh_path, context->info->options->bg_style, current->image, env);
-	current = current->next;
+	if (context->info->options->colors != 0) {
+		write_color_file(context->info->home_dir, current->image, context->info->options->dark);
 
-	//signal(SIGHUP, SIG_IGN);
+		xrdb_exec(context->info->options->xrdb_path, xrdb_argv);
+	}
+	current = current->next;
 
 	int running = 0;
 
@@ -90,11 +95,19 @@ int event_loop_run(loop_context* context) {
 				int bytes_read = 0;
 				bytes_read = read(events[i].data.fd, fdsi, sizeof(struct signalfd_siginfo));
 
-				if (bytes_read < 0) {
-					//not valid read
+				if (fdsi->ssi_signo == SIGTERM) {
+					syslog(LOG_NOTICE, "SIGTERM has been recived: Quiting");
+					running = 1;
 				}
-
-				if (fdsi->ssi_signo == SIGHUP) {
+				else if (fdsi->ssi_signo == SIGQUIT) {
+					syslog(LOG_NOTICE, "SIGQUIT has been recived: Quiting");
+					running = 1;
+				}
+				else if (fdsi->ssi_signo == SIGINT) {
+					syslog(LOG_NOTICE, "SIGINT has been recived: Quiting");
+					running = 1;
+				}
+				else if (fdsi->ssi_signo == SIGHUP) {
 
 					syslog(LOG_NOTICE, "SIGHUP has been recived: regening config");
 
@@ -116,9 +129,18 @@ int event_loop_run(loop_context* context) {
 
 					env = prep_enviroment(context->info->display, context->info->x_auth, context->info->home_dir);
 
+					free_env(xrdb_argv);
+
+					xrdb_argv = prep_xrdb_argv(context->info->options->xrdb_argv);
+
 					current = context->info->picture_list;
 
 					feh_exec(context->info->options->feh_path, context->info->options->bg_style, current->image, env);
+					if (context->info->options->colors != 0) {
+						write_color_file(context->info->home_dir, current->image, context->info->options->dark);
+
+						xrdb_exec(context->info->options->xrdb_path, xrdb_argv);
+					}
 					current = current->next;
 
 					syslog(LOG_NOTICE, "config regened");
@@ -128,6 +150,11 @@ int event_loop_run(loop_context* context) {
 					syslog(LOG_NOTICE, "SIGUSR1 has been recived: skiping ahead");
 					//skip ahead
 					feh_exec(context->info->options->feh_path, context->info->options->bg_style, current->image, env);
+					if (context->info->options->colors != 0) {
+						write_color_file(context->info->home_dir, current->image, context->info->options->dark);
+
+						xrdb_exec(context->info->options->xrdb_path, xrdb_argv);
+					}
 					current = current->next;
 				}
 				else if (fdsi->ssi_signo == SIGUSR2) {
@@ -136,6 +163,11 @@ int event_loop_run(loop_context* context) {
 					current = shuffle(current);
 
 					feh_exec(context->info->options->feh_path, context->info->options->bg_style, current->image, env);
+					if (context->info->options->colors != 0) {
+						write_color_file(context->info->home_dir, current->image, context->info->options->dark);
+
+						xrdb_exec(context->info->options->xrdb_path, xrdb_argv);
+					}
 					current = current->next;
 				}
 
@@ -147,11 +179,23 @@ int event_loop_run(loop_context* context) {
 				read(events[i].data.fd, &expires, sizeof(uint64_t));
 				if (expires > 0) {
 					feh_exec(context->info->options->feh_path, context->info->options->bg_style, current->image, env);
+					if (context->info->options->colors != 0) {
+						write_color_file(context->info->home_dir, current->image, context->info->options->dark);
+
+						xrdb_exec(context->info->options->xrdb_path, xrdb_argv);
+					}
 					current = current->next;
 				}
 			}
 		}
 	}
+
+	free_env(env);
+	free_env(xrdb_argv);
+
+	close(timer);
+	close(sig_fd);
+	close(efd);
 
 	return 0;
 }
@@ -168,6 +212,24 @@ static inline void feh_exec(const char* path, const char* bg_style, const char* 
 
 	if (feh_pid == 0) {
 		execle(path, "walld-feh", bg_style, "--no-fehbg", image, NULL, env);
+	}
+}
+
+static inline void write_color_file(const char* home_dir, const char* image, int dark) {
+	put_colors_in_file(home_dir, image, dark);
+}
+
+static inline void xrdb_exec(const char* path, char** xrdb_argv) {
+	pid_t xrdb_pid;
+
+	xrdb_pid = fork();
+
+	if (xrdb_pid < 0) {
+		abort();
+	}
+
+	if (xrdb_pid == 0) {
+		execvp(path, xrdb_argv);
 	}
 }
 
@@ -216,7 +278,7 @@ char** prep_enviroment(const char* display, const char* x_auth, const char* home
 		index++;
 	}
 	else {
-		env[index] = "DISPLAY=:0";
+		env[index] = strdup("DISPLAY=:0");
 
 		index++;
 	}
@@ -331,5 +393,10 @@ void free_env(char** env) {
 				free(env[i]);
 			}
 		}
+		free(env);
 	}
+}
+
+char** prep_xrdb_argv(linked_node* node) {
+	return list_to_null_termed_string_array(node);
 }
