@@ -49,7 +49,7 @@ Walld uses libconfig for handling config files.
 The config can be used to set many things.
 
 | Option | Description | Default |
-| :----------- | :-------: | ----------- |
+| :----------- | ------- | ----------- |
 | Colors | This tells walld whether or not to generate colors and put them in a file located at $HOME/.walld/colors | FALSE |
 | Dark | When walld generates colors, it modifies them to make them darker or lighter. If Dark is true it make the colors better fit a dark color scheme. If it is false it makes the colors fit a lighter color scheme. | TRUE |
 | Use-xrdb | Set this to true to have walld automatically reload your Xresources when it generates a new color file. | FALSE |
@@ -59,22 +59,22 @@ The config can be used to set many things.
 | Feh-path | This is where the feh executable is located. | "/usr/bin/feh" |
 | Bg-style | This is an option that walld passes to feh when it sets the wallpaper. | "--bg-scale" |
 | XAUTHORITY | Walld usually gets this from environment variables. If you have something custom you can set it here. | not set |
-| Display | Walld usally gets this from environment variables. If you have something custom you can set it here. It is used to tell feh what display to set the wallpaper on. | not set |
+| Display | Walld usually gets this from environment variables. If you have something custom you can set it here. It is used to tell feh what display to set the wallpaper on. | not set |
 | Xrdb-path | This is where the xrdb executable is located. | "/usr/bin/xrdb" |
 | Xrdb-args | These are the arguments passed to xrdb. If you have something custom you can set it here. | "--load" |
 | Xresources | This is your .Xresources that xrdb will load. If you have something custom you can set it here. | "$HOME/.Xresources" |
 
 ## Signals
 
-Walld can respond to serveal diffrent signals
+Walld can respond to several signals:
 
 | Signal | Action |
 | :---   | :----- |
 | SIGHUP | Reload config |
-| SIGUSR1| Advances the wallpapers by one |
-| SIGUSR2| Reshuffles wallpapers |
+| SIGUSR1| Advance the wallpapers by one |
+| SIGUSR2| Reshuffle wallpapers |
 
 ## License
 This project is released under the GNU Public License Version 3 or Later.
 
-See COPYING for more details
+See COPYING for more details.
