@@ -66,8 +66,6 @@ The config can be used to set many things.
 
 ## Signals
 
-Walld can respond to several signals:
-
 | Signal | Action |
 | :---   | :----- |
 | SIGHUP | Reload config |
