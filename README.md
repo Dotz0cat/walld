@@ -30,21 +30,13 @@ imagemagick
 xorg-xrdb
 ```
 
-#### Step 1:
+##### Steps:
 
-Download latest release from Github
+1. Download latest release from Github
 
-#### Step 2:
+2. `$ make`
 
-`$ make`
-
-#### Step 3:
-
-`$ make PREFIX="/install/Path" install`
-
-Step 3 may need to be ran as root
-
-Walld will now be installed
+3. `$ make PREFIX="/install/Path" install`
 
 ## Config
 
