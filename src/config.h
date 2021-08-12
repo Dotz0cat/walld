@@ -34,6 +34,8 @@ struct _settings {
 
 	int dark;
 
+	int xrdb_use;
+
 	char* feh_path;
 
 	char* xrdb_path;

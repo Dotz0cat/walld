@@ -27,6 +27,7 @@ settings* read_config(const char* config_file, const char* home_dir) {
 	const char* source;
 	int colors;
 	int dark;
+	int use_xrdb;
 	const char* bg_style;
 	const char* x_auth;
 	const char* display;
@@ -77,14 +78,21 @@ settings* read_config(const char* config_file, const char* home_dir) {
 		options->colors = colors;
 	}
 	else {
-		options->colors = 0;
+		options->colors = CONFIG_FALSE;
 	}
 
 	if (config_lookup_bool(&config, "dark", &dark)) {
 		options->dark = dark;
 	}
 	else {
-		options->dark = 0;
+		options->dark = CONFIG_FALSE;
+	}
+
+	if (config_lookup_bool(&config, "use-xrdb", &use_xrdb)) {
+		options->xrdb_use = use_xrdb;
+	}
+	else {
+		options->xrdb_use = CONFIG_FALSE;
 	}
 
 	if (config_lookup_string(&config, "bg-style", &bg_style)) {

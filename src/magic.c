@@ -210,7 +210,24 @@ void put_colors_in_file(const char* home_dir, const char* image, int dark) {
 		}
 		list = get_colors(image, i, &len);
 		i++;
-	} while (len != 16);
+	} while (len != 16 && i < 40);
+
+	if (list == NULL) {
+		free(color_file);
+		return;
+	}
+
+	if (i >= 40) {
+		//it span too many times and did not get 16 colors
+		free(color_file);
+		if (list != NULL) {
+			for (int j = 0; j < (int) len; j++) {
+				free(list[j]);
+			}
+			free(list);
+		}
+		return;
+	}
 
 	//adjustments
 	//hsl

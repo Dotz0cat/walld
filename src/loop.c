@@ -81,7 +81,9 @@ int event_loop_run(loop_context* context) {
 	if (context->info->options->colors != 0) {
 		write_color_file(context->info->home_dir, current->image, context->info->options->dark);
 
-		xrdb_exec(context->info->options->xrdb_path, xrdb_argv);
+		if (context->info->options->xrdb_use != 0) {
+			xrdb_exec(context->info->options->xrdb_path, xrdb_argv);
+		}
 	}
 	current = current->next;
 
@@ -144,7 +146,9 @@ int event_loop_run(loop_context* context) {
 					if (context->info->options->colors != 0) {
 						write_color_file(context->info->home_dir, current->image, context->info->options->dark);
 
-						xrdb_exec(context->info->options->xrdb_path, xrdb_argv);
+						if (context->info->options->xrdb_use != 0) {
+							xrdb_exec(context->info->options->xrdb_path, xrdb_argv);
+						}
 					}
 					current = current->next;
 
@@ -158,7 +162,9 @@ int event_loop_run(loop_context* context) {
 					if (context->info->options->colors != 0) {
 						write_color_file(context->info->home_dir, current->image, context->info->options->dark);
 
-						xrdb_exec(context->info->options->xrdb_path, xrdb_argv);
+						if (context->info->options->xrdb_use != 0) {
+							xrdb_exec(context->info->options->xrdb_path, xrdb_argv);
+						}
 					}
 					current = current->next;
 				}
@@ -171,7 +177,9 @@ int event_loop_run(loop_context* context) {
 					if (context->info->options->colors != 0) {
 						write_color_file(context->info->home_dir, current->image, context->info->options->dark);
 
-						xrdb_exec(context->info->options->xrdb_path, xrdb_argv);
+						if (context->info->options->xrdb_use != 0) {
+							xrdb_exec(context->info->options->xrdb_path, xrdb_argv);
+						}
 					}
 					current = current->next;
 				}
@@ -187,7 +195,9 @@ int event_loop_run(loop_context* context) {
 					if (context->info->options->colors != 0) {
 						write_color_file(context->info->home_dir, current->image, context->info->options->dark);
 
-						xrdb_exec(context->info->options->xrdb_path, xrdb_argv);
+						if (context->info->options->xrdb_use != 0) {
+							xrdb_exec(context->info->options->xrdb_path, xrdb_argv);
+						}
 					}
 					current = current->next;
 				}
