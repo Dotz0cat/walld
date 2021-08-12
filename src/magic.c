@@ -32,6 +32,8 @@ file_type image_or_text(const char* path) {
 
 	strcpy(info->filename, path);
 
+	info->debug = MagickTrue;
+
 	image = PingImage(info, exception);
 
 	if (exception->severity != UndefinedException) {
@@ -314,8 +316,8 @@ void put_colors_in_file(const char* home_dir, const char* image, int dark) {
 
 rgb* hex_to_rgb(const char* hex_string) {
 	rgb* hex_as_rgb = malloc(sizeof(rgb));
-
-	sscanf(hex_string, "#%2x%2x%2x", &hex_as_rgb->r, &hex_as_rgb->g, &hex_as_rgb->b);
+	
+	sscanf(hex_string, "#%02x%02x%02x", &hex_as_rgb->r, &hex_as_rgb->g, &hex_as_rgb->b);
 
 	return hex_as_rgb;
 }
@@ -335,7 +337,12 @@ hsl* rgb_to_hsl(const rgb* color) {
 
 	hsl_conv->l = (max_c + min_c)/2;
 
+	if ((max_c - min_c) == 0) {
+		hsl_conv->s = 0;
+	}
 	hsl_conv->s = (int) (max_c - min_c)/(1 - fabsf(2 * hsl_conv->l - 1));
+
+	hsl_conv->h = 0;
 
 	if ((max_c - min_c) == 0) {
 		hsl_conv->h = 0;
@@ -351,6 +358,14 @@ hsl* rgb_to_hsl(const rgb* color) {
 	else if (max_c == b) {
 		int h = ((r - g)/ (max_c - min_c)) + 4;
 		hsl_conv->h = h * 60;
+	}
+
+	if (hsl_conv->h < 0) {
+		hsl_conv->h = 360 - hsl_conv->h;
+	}
+
+	if (hsl_conv->h >= 360) {
+		hsl_conv->h = (int) hsl_conv->h % 360;
 	}
 
 	return hsl_conv;
@@ -413,11 +428,16 @@ rgb* hsl_to_rgb(const hsl* color) {
 }
 
 char* rgb_to_hex(const rgb* color) {
-	char* hex = malloc(1 + 2 + 2 + 2 + 1);
+	char* hex = malloc(4096);
 
-	sprintf(hex, "#%2x%2x%2x", color->r, color->g, color->b);
+	snprintf(hex, 8, "#%2x%2x%2x", color->r, color->g, color->b);
 
-	return hex;
+	//strdup trims the memory needed
+	char* hex2 = strdup(hex);
+
+	free(hex);
+
+	return hex2;
 }
 
 void lighten_rgb(rgb* color, float factor) {

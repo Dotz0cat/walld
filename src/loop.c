@@ -69,8 +69,13 @@ int event_loop_run(loop_context* context) {
 		abort();
 	}
 
-	char** env = prep_enviroment(context->info->display, context->info->x_auth, context->info->home_dir);
-	char** xrdb_argv = prep_xrdb_argv(context->info->options->xrdb_argv);
+	size_t env_len = 0;
+
+	char** env = prep_enviroment(context->info->display, context->info->x_auth, context->info->home_dir, &env_len);
+
+	size_t xrdb_len = 0;
+
+	char** xrdb_argv = prep_xrdb_argv(context->info->options->xrdb_argv, &xrdb_len);
 
 	feh_exec(context->info->options->feh_path, context->info->options->bg_style, current->image, env);
 	if (context->info->options->colors != 0) {
@@ -125,13 +130,13 @@ int event_loop_run(loop_context* context) {
 						abort();
 					}
 
-					free_env(env);
+					free_env(env, env_len);
 
-					env = prep_enviroment(context->info->display, context->info->x_auth, context->info->home_dir);
+					env = prep_enviroment(context->info->display, context->info->x_auth, context->info->home_dir, &env_len);
 
-					free_env(xrdb_argv);
+					free_env(xrdb_argv, xrdb_len);
 
-					xrdb_argv = prep_xrdb_argv(context->info->options->xrdb_argv);
+					xrdb_argv = prep_xrdb_argv(context->info->options->xrdb_argv, &xrdb_len);
 
 					current = context->info->picture_list;
 
@@ -190,8 +195,8 @@ int event_loop_run(loop_context* context) {
 		}
 	}
 
-	free_env(env);
-	free_env(xrdb_argv);
+	free_env(env, env_len);
+	free_env(xrdb_argv, xrdb_len);
 
 	close(timer);
 	close(sig_fd);
@@ -233,7 +238,7 @@ static inline void xrdb_exec(const char* path, char** xrdb_argv) {
 	}
 }
 
-char** prep_enviroment(const char* display, const char* x_auth, const char* home) {
+char** prep_enviroment(const char* display, const char* x_auth, const char* home, size_t* size) {
 	int count = 0;
 
 	if (display != NULL) {
@@ -254,7 +259,10 @@ char** prep_enviroment(const char* display, const char* x_auth, const char* home
 
 	count++;
 
+	*size = count;
+
 	char** env = malloc(count * sizeof(char*));
+
 
 	int index = 0;
 
@@ -352,6 +360,15 @@ pre_init_stuff* regen_config(pre_init_stuff* info) {
 			free_list(info->options->sources);
 		}
 
+		if (info->options->xrdb_path != NULL) {
+			free(info->options->xrdb_path);
+		}
+
+		if (info->options->xrdb_argv != NULL) {
+			free_list(info->options->xrdb_argv);
+		}
+
+
 		free(info->options);
 	}
 
@@ -384,10 +401,9 @@ pre_init_stuff* regen_config(pre_init_stuff* info) {
 	return info;
 }
 
-void free_env(char** env) {
+void free_env(char** env, size_t env_len) {
 	if (env != NULL) {
 		//size_t env_len = sizeof(env) / sizeof(*env);
-		size_t env_len = (&env)[0] - env;
 		for (size_t i = 0; i < env_len; i++) {
 			if (env[i] != NULL) {
 				free(env[i]);
@@ -397,6 +413,6 @@ void free_env(char** env) {
 	}
 }
 
-char** prep_xrdb_argv(linked_node* node) {
-	return list_to_null_termed_string_array(node);
+char** prep_xrdb_argv(linked_node* node, size_t* xrdb_len) {
+	return list_to_null_termed_string_array(node, xrdb_len);
 }

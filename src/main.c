@@ -74,11 +74,9 @@ int main(int argc, char** argv) {
 
 	pre_init_stuff* info = pre_init();
 
-	init_daemon();
+	//init_daemon();
 
 	syslog(LOG_NOTICE, "Walld is inited");
-
-	fprintf(stderr, "this is stderr");
 
 	magick_threads(4);
 
@@ -94,10 +92,16 @@ int main(int argc, char** argv) {
 	event_loop_run(context);
 
 	free_list(info->options->sources);
+	free_list(info->options->xrdb_argv);
+	free(info->options->xrdb_path);
 	free(info->options->feh_path);
 	free(info->options->bg_style);
-	free(info->options->x_auth);
-	free(info->options->display);
+	if (info->options->x_auth != NULL) {
+		free(info->options->x_auth);
+	}
+	if (info->options->display != NULL) {
+		free(info->options->display);
+	}
 	free(info->options);
 
 	free(info->home_dir);
@@ -175,7 +179,7 @@ static pre_init_stuff* pre_init(void) {
         home = pw->pw_dir;
 	}
 
-	info->home_dir = home;
+	info->home_dir = strdup(home);
 
 	char* x_auth = strdup(getenv("XAUTHORITY"));
 

@@ -327,7 +327,7 @@ char* realpath_wrap(const char* path, const char* dir) {
 	return res;
 }
 
-char** list_to_null_termed_string_array(linked_node* head) {
+char** list_to_null_termed_string_array(linked_node* head, size_t* len) {
 	int count = 0;
 	linked_node* count_head = head;
 	do {
@@ -335,18 +335,22 @@ char** list_to_null_termed_string_array(linked_node* head) {
 		count_head = count_head->next;
 	} while (count_head != NULL && count_head != head);
 
-	char** array = malloc((count * sizeof(char*)) + 1);
+	count++;
+
+	char** array = malloc(count * sizeof(char*));
+
+	*len = count;
 
 	int i = 0;
 
 	linked_node* add_head = head;
 
-	for (i = 0; i < count; i++) {
+	for (i = 0; i < count - 1; i++) {
 		array[i] = strdup(add_head->image);
 		add_head = add_head->next;
 	}
 
-	array[count + 1] = NULL;
+	array[count - 1] = NULL;
 
 	return array;
 }
