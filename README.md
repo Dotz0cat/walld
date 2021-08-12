@@ -46,8 +46,6 @@ If it does not exist walld will make a new one.
 
 Walld uses libconfig for handling config files.
 
-The config can be used to set many things.
-
 | Option | Description | Default |
 | :----------- | ------- | ----------- |
 | Colors | This tells walld whether or not to generate colors and put them in a file located at $HOME/.walld/colors | FALSE |
