@@ -57,7 +57,7 @@ Walld uses libconfig for handling config files.
 The config can be used to set many things.
 
 | Option | Description | Default |
-| :----------- | :-------: | -----------: |
+| :----------- | :-------: | ----------- |
 | Colors | This tells walld whether or not to generate colors and put them in a file located at $HOME/.walld/colors | FALSE |
 | Dark | When walld generates colors, it modifies them to make them darker or lighter. If Dark is true it make the colors better fit a dark color scheme. If it is false it makes the colors fit a lighter color scheme. | TRUE |
 | Use-xrdb | Set this to true to have walld automatically reload your Xresources when it generates a new color file. | FALSE |
