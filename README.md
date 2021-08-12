@@ -40,7 +40,7 @@ Download latest release from Github
 
 #### Step 3:
 
-`$ make PREFIX="/instal/Path" install`
+`$ make PREFIX="/install/Path" install`
 
 Step 3 may need to be ran as root
 
@@ -56,8 +56,8 @@ Walld uses libconfig for handling config files.
 
 The config can be used to set many things.
 
-| Signal | Description | Default |
-| :----------- | :------- | :----------- |
+| Option | Description | Default |
+| :----------- | :-------: | -----------: |
 | Colors | This tells walld whether or not to generate colors and put them in a file located at $HOME/.walld/colors | FALSE |
 | Dark | When walld generates colors, it modifies them to make them darker or lighter. If Dark is true it make the colors better fit a dark color scheme. If it is false it makes the colors fit a lighter color scheme. | TRUE |
 | Use-xrdb | Set this to true to have walld automatically reload your Xresources when it generates a new color file. | FALSE |
@@ -78,9 +78,9 @@ Walld can respond to serveal diffrent signals
 
 | Signal | Action |
 | :---   | :----- |
-| SIGHUP | This reloads the config |
-| SIGUSR1| This advances the wallpapers by one |
-| SIGUSR2| This reshuffles the wallpapers |
+| SIGHUP | Reload config |
+| SIGUSR1| Advances the wallpapers by one |
+| SIGUSR2| Reshuffles wallpapers |
 
 ## License
 This project is released under the GNU Public License Version 3 or Later.
