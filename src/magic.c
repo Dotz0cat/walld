@@ -217,7 +217,7 @@ void put_colors_in_file(const char* home_dir, const char* image, int dark) {
 
 	char** list2 = malloc(sizeof(char*) * len);
 
-	if (dark == 0) {
+	if (dark) {
 		for (int k = 0; k < (int) len; k++) {
 			list2[k] = strdup(list[k]);
 		}
@@ -340,7 +340,7 @@ hsl* rgb_to_hsl(const rgb* color) {
 	if ((max_c - min_c) == 0) {
 		hsl_conv->s = 0;
 	}
-	hsl_conv->s = (int) (max_c - min_c)/(1 - fabsf(2 * hsl_conv->l - 1));
+	hsl_conv->s = (max_c - min_c)/(1 - fabsf(2 * hsl_conv->l - 1));
 
 	hsl_conv->h = 0;
 
@@ -348,24 +348,24 @@ hsl* rgb_to_hsl(const rgb* color) {
 		hsl_conv->h = 0;
 	}
 	else if (max_c == r) {
-		int h = ( (int) ((g - b)/ (max_c - min_c))) % 6;
+		float h = fmodf(((g - b)/ (max_c - min_c)), 6);
 		hsl_conv->h = h * 60;
 	}
 	else if (max_c == g) {
-		int h = ((b - r)/ (max_c - min_c)) + 2;
+		float h = ((b - r)/ (max_c - min_c)) + 2;
 		hsl_conv->h = h * 60;
 	}
 	else if (max_c == b) {
-		int h = ((r - g)/ (max_c - min_c)) + 4;
+		float h = ((r - g)/ (max_c - min_c)) + 4;
 		hsl_conv->h = h * 60;
 	}
 
 	if (hsl_conv->h < 0) {
-		hsl_conv->h = 360 - hsl_conv->h;
+		hsl_conv->h = fmodf(hsl_conv->h, 360);
 	}
 
 	if (hsl_conv->h >= 360) {
-		hsl_conv->h = (int) hsl_conv->h % 360;
+		hsl_conv->h = fmodf(hsl_conv->h, 360);
 	}
 
 	return hsl_conv;
@@ -376,7 +376,7 @@ rgb* hsl_to_rgb(const hsl* color) {
 
 	float c = (2 * fabsf(2 * color->l - 1)) * color->s;
 
-	float x = c * (1 - abs(( (int) (color->h / 60.0) % 2) -1));
+	float x = c * (1 - fabsf(( fmodf((color->h / 60.0), 2) -1)));
 
 	float m = (color->l - (c / 2));
 
@@ -430,7 +430,7 @@ rgb* hsl_to_rgb(const hsl* color) {
 char* rgb_to_hex(const rgb* color) {
 	char* hex = malloc(4096);
 
-	snprintf(hex, 8, "#%2x%2x%2x", color->r, color->g, color->b);
+	snprintf(hex, 8, "#%02x%02x%02x", color->r, color->g, color->b);
 
 	//strdup trims the memory needed
 	char* hex2 = strdup(hex);

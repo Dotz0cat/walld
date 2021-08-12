@@ -38,7 +38,7 @@ enum _file_type {
 typedef struct _hsl hsl;
 
 struct _hsl {
-	int h;
+	float h;
 	float s;
 	float l;
 };

@@ -43,6 +43,7 @@ struct _linked_node {
 linked_node* add_node_to_list(linked_node* prev, char* data);
 linked_node* wind_to_tail(linked_node* node);
 void free_list(linked_node* head);
+void free_circular_list(linked_node* head);
 linked_node* shuffle(linked_node* head);
 static inline void relink(linked_node* prev, linked_node* next);
 void array_swap(linked_node** a, linked_node** b);

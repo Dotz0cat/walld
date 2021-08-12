@@ -59,16 +59,35 @@ linked_node* wind_to_tail(linked_node* node) {
 }
 
 void free_list(linked_node* head) {
+	linked_node* free_head;
 	linked_node* temp;
 
-	while (head->next != NULL) {
-		temp = head;
-		if (temp->image != NULL) {
-			free(temp->image);
+	free_head = head;
+
+	while (free_head != NULL) {
+		if (free_head->image != NULL) {
+			free(free_head->image);
 		}
-		head = temp->next;
+		temp = free_head;
+		free_head = free_head->next;
 		free(temp);
 	}
+}
+
+void free_circular_list(linked_node* head) {
+	linked_node* free_head;
+	linked_node* temp;
+
+	free_head = head;
+
+	do {
+		if (free_head->image != NULL) {
+			free(free_head->image);
+		}
+		temp = free_head;
+		free_head = free_head->next;
+		free(temp);
+	} while (free_head != NULL && free_head != head);
 }
 
 linked_node* shuffle(linked_node* head) {

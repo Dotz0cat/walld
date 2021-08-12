@@ -390,6 +390,8 @@ pre_init_stuff* regen_config(pre_init_stuff* info) {
 		info->display = info->options->display;
 	}
 
+	free_circular_list(info->picture_list);
+
 	info->picture_list = get_images(info->options->sources);
 
 	if (info->picture_list == NULL) {

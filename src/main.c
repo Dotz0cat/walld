@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
 
 	pre_init_stuff* info = pre_init();
 
-	//init_daemon();
+	init_daemon();
 
 	syslog(LOG_NOTICE, "Walld is inited");
 
@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
 	free(info->x_auth);
 	free(info->display);
 	free(info->config);
-	free_list(info->picture_list);
+	free_circular_list(info->picture_list);
 	free(info);
 
 	free(context);
