@@ -30,9 +30,9 @@ imagemagick
 xorg-xrdb
 ```
 
-##### Steps:
+#### Steps:
 
-1. Download latest release from Github
+1. Download latest release from Github.
 
 2. `$ make`
 
