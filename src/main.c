@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
 
 	pre_init_stuff* info = pre_init();
 
-	init_daemon();
+	init_daemon(info->home_dir);
 
 	syslog(LOG_NOTICE, "Walld is inited");
 
@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
 	return EXIT_SUCCESS;
 }
 
-static void init_daemon() {
+static void init_daemon(const char* home_dir) {
 	pid_t pid;
 
 	pid = fork();
@@ -161,8 +161,45 @@ static void init_daemon() {
 		close(x);
 	}
 
-	stdout = fopen("/home/seth/.walld/log", "w");
-	stderr = stdout;
+	int char_count = snprintf(NULL, 0, "%s%s", home_dir, "/.walld/log");
+
+	if (char_count <= 0) {
+		abort();
+	}
+
+	char* log_file = malloc(char_count + 1U);
+
+	if (log_file == NULL) {
+		abort();
+	}
+
+	snprintf(log_file, char_count + 1U, "%s%s", home_dir, "/.walld/log");
+
+	stdin = fopen("/dev/null", "r");
+	stdout = fopen(log_file, "w");
+
+	free(log_file);
+
+	char_count = 0;
+
+	char_count = snprintf(NULL, 0, "%s%s", home_dir, "/.walld/error-log");
+
+	if (char_count <= 0) {
+		abort();
+	}
+
+	char* err_log_file = malloc(char_count + 1U);
+
+	if (err_log_file == NULL) {
+		abort();
+	}
+
+	snprintf(err_log_file, char_count + 1U, "%s%s", home_dir, "/.walld/error-log");
+
+
+	stderr = fopen(err_log_file, "w");
+
+	free(err_log_file);
 
 	openlog("walld", LOG_PID, LOG_DAEMON);
 }
