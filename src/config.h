@@ -17,8 +17,8 @@ This file is part of walld.
     along with walld.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef __CONFIG_H__
-#define __CONFIG_H__
+#ifndef CONFIG_H
+#define CONFIG_H
 
 #include <stdlib.h>
 #include <string.h>
@@ -60,4 +60,4 @@ static inline int file_exsits(const char* file);
 static inline int folder_exsits(const char* folder);
 static inline void check_default_image_folder(const char* home_dir);
 
-#endif /*__CONFIG_H__*/
+#endif /* CONFIG_H */

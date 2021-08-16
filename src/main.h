@@ -17,8 +17,8 @@ This file is part of walld.
     along with walld.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#ifndef MAIN_H
+#define MAIN_H
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -35,4 +35,4 @@ This file is part of walld.
 static void init_daemon(const char* home_dir);
 static pre_init_stuff* pre_init(void);
 
-#endif /*__MAIN_H__*/
+#endif /* MAIN_H */

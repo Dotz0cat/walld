@@ -17,8 +17,8 @@ This file is part of walld.
     along with walld.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef __LOOP_H__
-#define __LOOP_H__
+#ifndef LOOP_H
+#define LOOP_H
 
 #include <stdlib.h>
 #include <sys/epoll.h>
@@ -67,4 +67,4 @@ pre_init_stuff* regen_config(pre_init_stuff* info);
 void free_env(char** env, size_t env_len);
 char** prep_xrdb_argv(linked_node* node, size_t* xrdb_len);
 
-#endif /*__LOOP_H__*/
+#endif /* LOOP_H */

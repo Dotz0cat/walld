@@ -17,8 +17,8 @@ This file is part of walld.
     along with walld.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef __MAGIC_H__
-#define __MAGIC_H__
+#ifndef MAGIC_H
+#define MAGIC_H
 
 #include <ImageMagick-7/MagickCore/MagickCore.h>
 #include <stdlib.h>
@@ -65,4 +65,4 @@ void lighten_rgb(rgb* color, float factor);
 void darken_rgb(rgb* color, float factor);
 rgb* blend_colors(rgb* color1, rgb* color2);
 
-#endif /* __MAGIC_H__*/
+#endif /* MAGIC_H */

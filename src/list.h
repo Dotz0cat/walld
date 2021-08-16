@@ -17,8 +17,8 @@ This file is part of walld.
     along with walld.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef __LIST_H__
-#define __LIST_H__
+#ifndef LIST_H
+#define LIST_H
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -55,4 +55,4 @@ char** list_to_null_termed_string_array(linked_node* head, size_t* len);
 
 #include "config.h"
 
-#endif /*__LIST_H__*/
+#endif /* LIST_H */
