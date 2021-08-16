@@ -264,6 +264,8 @@ static pre_init_stuff* pre_init(void) {
 	info->picture_list = get_images(info->options->sources);
 
 	if (info->picture_list == NULL) {
+
+		fprintf(stderr, "Walld found no suitable images to use\r\n");
 		abort();
 	}
 
