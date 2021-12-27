@@ -53,7 +53,7 @@ struct _settings {
 	linked_node* xrdb_argv;
 };
 
-settings* read_config(const char* config_file, const char* home_dir);
+settings* read_config(const char* config_file, const char* home_dir, const char* source_from_line);
 linked_node* list_file_parse(const char* list_file);
 void produce_default_config(const char* output_file, const char* home_dir);
 static inline int file_exsits(const char* file);

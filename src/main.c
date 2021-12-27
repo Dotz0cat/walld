@@ -69,10 +69,35 @@ int main(int argc, char** argv) {
 		abort();
 	}
 
+	//get opt stuff
+	//sperate function?
+
+	int time_minutes = 0;
+	char* config_from_cmd_line = NULL;
+	char* source_from_line = NULL;
+	int opt = 0;
+
+	while((opt = getopt(argc, argv, "c:t:s:")) != -1) {
+		switch(opt) {
+			case 'c':
+				config_from_cmd_line = strdup(optarg);
+				break;
+			case 't':
+				time_minutes = atoi(optarg);
+				break;
+			case 's':
+				source_from_line = strdup(optarg);
+				break;
+			default: /* ? */
+				fprintf(stderr, "Usage: %s [-c config] [-t time] [-s source]\r\n", argv[0]);
+				return EXIT_FAILURE;
+		}
+	}
+
 	magick_start(argv[1]);
 	magick_threads(1);
 
-	pre_init_stuff* info = pre_init();
+	pre_init_stuff* info = pre_init(config_from_cmd_line, time_minutes, source_from_line);
 
 	init_daemon(info->home_dir);
 
@@ -105,6 +130,11 @@ int main(int argc, char** argv) {
 	free(info->options);
 
 	free(info->home_dir);
+	if (info->source != NULL) {
+		free(info->source);
+		//also frees source_from_line
+		//freeing here because this is where I think asan will scream
+	}
 	free(info->x_auth);
 	free(info->display);
 	free(info->config);
@@ -204,7 +234,7 @@ static void init_daemon(const char* home_dir) {
 	openlog("walld", LOG_PID, LOG_DAEMON);
 }
 
-static pre_init_stuff* pre_init(void) {
+static pre_init_stuff* pre_init(char* config, int time, char* source) {
 
 	pre_init_stuff* info = malloc(sizeof(pre_init_stuff));
 
@@ -226,23 +256,32 @@ static pre_init_stuff* pre_init(void) {
 
 	info->display = display;
 
-	int count = snprintf(NULL, 0, "%s%s", home, "/.walld/.walldrc");
+	if (config != NULL) {
+		info->config = config;
+	}
+	else {
+		int count = snprintf(NULL, 0, "%s%s", home, "/.walld/.walldrc");
 
-	if (count <= 0) {
-		abort();
+		if (count <= 0) {
+			abort();
+		}
+
+		char* config_file = malloc(count + 1U);
+
+		if (config_file == NULL) {
+			abort();
+		}
+
+		snprintf(config_file, count + 1U, "%s%s", home, "/.walld/.walldrc");
+
+		info->config = config_file;
 	}
 
-	char* config_file = malloc(count + 1U);
+	info->source = source;
 
-	if (config_file == NULL) {
-		abort();
-	}
+	info->options = read_config(info->config, home, info->source);
 
-	snprintf(config_file, count + 1U, "%s%s", home, "/.walld/.walldrc");
-
-	info->config = config_file;
-
-	info->options = read_config(config_file, home);
+	info->time = time;
 
 	//config file takes piority over enviroment variables
 	if (info->options->x_auth != NULL) {

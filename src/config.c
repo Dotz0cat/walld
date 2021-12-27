@@ -19,7 +19,7 @@ This file is part of walld.
 
 #include "config.h"
 
-settings* read_config(const char* config_file, const char* home_dir) {
+settings* read_config(const char* config_file, const char* home_dir, const char* source_from_line) {
 	settings* options = malloc(sizeof(settings));
 
 	config_t config;
@@ -130,13 +130,18 @@ settings* read_config(const char* config_file, const char* home_dir) {
 		options->minutes = 30;
 	}
 
-	if (config_lookup_string(&config, "source_to_use", &source)) {
-		//NOP
+	if (source_from_line != NULL) {
+		source = source_from_line;
 	}
 	else {
-		source = "default";
+		if (config_lookup_string(&config, "source_to_use", &source)) {
+		//NOP
+		}
+		else {
+			source = "default";
+		}
 	}
-
+	
 	setting = config_lookup(&config, source);
 
 	if (setting != NULL) {

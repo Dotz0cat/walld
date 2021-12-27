@@ -44,7 +44,18 @@ int event_loop_run(loop_context* context) {
 
 	struct itimerspec timespec;
 
-	long seconds = context->info->options->minutes * 60;
+	long seconds;
+
+	if (context->info->time > 0) {
+		seconds = context->info->time * 60;
+	}
+	else if (context->info->options->minutes <= 0) {
+		seconds = 30 * 60;
+	}
+	else {
+		seconds = context->info->options->minutes * 60;
+	}
+	
 
 	timespec.it_value.tv_sec = seconds;
 	timespec.it_value.tv_nsec = 0;
@@ -89,11 +100,11 @@ int event_loop_run(loop_context* context) {
 
 	int running = 0;
 
-	struct epoll_event events[1];
+	struct epoll_event events[3];
 
 	while(running == 0) {
 		//things
-		int num_of_events = epoll_wait(efd, events, 1, 10000);
+		int num_of_events = epoll_wait(efd, events, 3, 10000);
 
 		for (int i = 0; i < num_of_events; i++) {
 			if (events[i].data.fd == sig_fd) {
@@ -121,7 +132,15 @@ int event_loop_run(loop_context* context) {
 					//regen config
 					context->info = regen_config(context->info);
 
-					seconds = context->info->options->minutes * 60;
+					if (context->info->time > 0) {
+						seconds = context->info->time * 60;
+					}
+					else if (context->info->options->minutes <= 0) {
+						seconds = 30 * 60;
+					}
+					else {
+						seconds = context->info->options->minutes * 60;
+					}
 
 					timespec.it_value.tv_sec = seconds;
 					timespec.it_value.tv_nsec = 0;
@@ -167,6 +186,26 @@ int event_loop_run(loop_context* context) {
 						}
 					}
 					current = current->next;
+
+					//reprime timer
+					if (context->info->time > 0) {
+						seconds = context->info->time * 60;
+					}
+					else if (context->info->options->minutes <= 0) {
+						seconds = 30 * 60;
+					}
+					else {
+						seconds = context->info->options->minutes * 60;
+					}
+
+					timespec.it_value.tv_sec = seconds;
+					timespec.it_value.tv_nsec = 0;
+					timespec.it_interval.tv_sec = seconds;
+					timespec.it_interval.tv_nsec = 0;
+
+					if (timerfd_settime(timer, 0, &timespec, NULL) != 0) {
+						abort();
+					}
 				}
 				else if (fdsi->ssi_signo == SIGUSR2) {
 					//re shuffle the picture list
@@ -182,6 +221,26 @@ int event_loop_run(loop_context* context) {
 						}
 					}
 					current = current->next;
+
+					//reprime timer
+					if (context->info->time > 0) {
+						seconds = context->info->time * 60;
+					}
+					else if (context->info->options->minutes <= 0) {
+						seconds = 30 * 60;
+					}
+					else {
+						seconds = context->info->options->minutes * 60;
+					}
+
+					timespec.it_value.tv_sec = seconds;
+					timespec.it_value.tv_nsec = 0;
+					timespec.it_interval.tv_sec = seconds;
+					timespec.it_interval.tv_nsec = 0;
+
+					if (timerfd_settime(timer, 0, &timespec, NULL) != 0) {
+						abort();
+					}
 				}
 
 				free(fdsi);
@@ -382,7 +441,7 @@ pre_init_stuff* regen_config(pre_init_stuff* info) {
 		free(info->options);
 	}
 
-	info->options = read_config(info->config, info->home_dir);
+	info->options = read_config(info->config, info->home_dir, info->source);
 
 	if (info->options->x_auth != NULL) {
 		if (info->x_auth != NULL) {
