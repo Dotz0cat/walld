@@ -16,7 +16,6 @@ A custom config can be passed with `-c`
 A custom time can be passed with `-t`
 
 A custom source can be passed with `-s`
-
 See Config section for more info
 
 ## Installation
@@ -52,6 +51,7 @@ xorg-xrdb
 ## Config
 
 Walld has a config located at $HOME/.walld/.walldrc
+You can pass a custom config in with `-c`
 
 You can pass a custom config in with `-c`
 
