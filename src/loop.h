@@ -39,6 +39,9 @@ struct _pre_init_stuff {
 	//store the home dir becuase once forked it will loose it
 	char* home_dir;
 
+	//this is from the command line
+	char* source;
+
 	char* x_auth;
 
 	char* display;
@@ -46,6 +49,9 @@ struct _pre_init_stuff {
 	char* config;
 
 	settings* options;
+
+	//only used when the time is passed on command line
+	int time;
 
 	linked_node* picture_list;
 };

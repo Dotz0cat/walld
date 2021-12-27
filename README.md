@@ -5,8 +5,19 @@ A wallpaper daemon. Walld automatically sets and changes the wallpaper. It sets 
 ## Usage
 
 Walld is meant to be started by your xinit or started in your i3 config. It can also be started in a terminal as well.
+Values passed by arguments will take priority over values in the config.
 
 `$ walld`
+
+`Usage: walld [-c config] [-t time] [-s source]`
+
+A custom config can be passed with `-c`
+
+A custom time can be passed with `-t`
+
+A custom source can be passed with `-s`
+
+See Config section for more info
 
 ## Installation
 
@@ -41,6 +52,8 @@ xorg-xrdb
 ## Config
 
 Walld has a config located at $HOME/.walld/.walldrc
+
+You can pass a custom config in with `-c`
 
 If it does not exist walld will make a new one.
 
