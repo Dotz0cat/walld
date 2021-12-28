@@ -51,7 +51,6 @@ xorg-xrdb
 ## Config
 
 Walld has a config located at $HOME/.walld/.walldrc
-You can pass a custom config in with `-c`
 
 You can pass a custom config in with `-c`
 
