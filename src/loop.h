@@ -77,8 +77,6 @@ typedef struct _loop_context loop_context;
 struct _loop_context {
 	pre_init_stuff* info;
 
-	//sigset_t sigs;
-
 	linked_node* current;
 
 	char** env;
@@ -91,7 +89,6 @@ struct _loop_context {
 
 	struct timeval* seconds;
 
-	//TODO: comeup with better name
 	events_box* event_box;
 };
 
@@ -110,6 +107,5 @@ static void sighup_cb(evutil_socket_t sig, short events, void* user_data);
 static void sigusr1_cb(evutil_socket_t sig, short events, void* user_data);
 static void sigusr2_cb(evutil_socket_t sig, short events, void* user_data);
 static void timer_expire_cb(evutil_socket_t fd, short events, void* user_data);
-
 
 #endif /* LOOP_H */

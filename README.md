@@ -31,8 +31,9 @@ Walld can also be installed by makefile
 ### Dependencies:
 ```
 feh
-libconfig
 imagemagick
+libconfig
+libevent
 ```
 
 ### Optional Dependencies:
