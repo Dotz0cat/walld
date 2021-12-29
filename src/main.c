@@ -26,52 +26,6 @@ int main(int argc, char** argv) {
 	setenv("KMP_LOCK_KIND", "futex", 1);
 	#endif
 
-	signal(SIGHUP, SIG_IGN);
-	signal(SIGCHLD, SIG_IGN);
-	signal(SIGUSR1, SIG_IGN);
-	signal(SIGUSR2, SIG_IGN);
-
-	signal(SIGTERM, SIG_IGN);
-	signal(SIGQUIT, SIG_IGN);
-	signal(SIGINT, SIG_IGN);
-
-	sigset_t sigs;
-
-	if (sigemptyset(&sigs) != 0) {
-		abort();
-	}
-
-	if (sigaddset(&sigs, SIGHUP) != 0) {
-		abort();
-	}
-
-	if (sigaddset(&sigs, SIGUSR1) != 0) {
-		abort();
-	}
-
-	if (sigaddset(&sigs, SIGUSR2) != 0) {
-		abort();
-	}
-
-	if (sigaddset(&sigs, SIGTERM) != 0) {
-		abort();
-	}
-
-	if (sigaddset(&sigs, SIGQUIT) != 0) {
-		abort();
-	}
-
-	if (sigaddset(&sigs, SIGINT) != 0) {
-		abort();
-	}
-
-	if (sigprocmask(SIG_BLOCK, &sigs, NULL) != 0) {
-		abort();
-	}
-
-	//get opt stuff
-	//sperate function?
-
 	int time_minutes = 0;
 	char* config_from_cmd_line = NULL;
 	char* source_from_line = NULL;
@@ -110,8 +64,6 @@ int main(int argc, char** argv) {
 
 	context->info = info;
 
-	context->sigs = sigs;
-
 	syslog(LOG_NOTICE, "Walld is started");
 
 	event_loop_run(context);
@@ -132,8 +84,6 @@ int main(int argc, char** argv) {
 	free(info->home_dir);
 	if (info->source != NULL) {
 		free(info->source);
-		//also frees source_from_line
-		//freeing here because this is where I think asan will scream
 	}
 	free(info->x_auth);
 	free(info->display);

@@ -58,7 +58,6 @@ void magick_start(const char* argv1) {
 }
 
 void magick_stop(void) {
-	//RelinquishMagickResource(ThreadResource, 1);
 	MagickCoreTerminus();
 }
 

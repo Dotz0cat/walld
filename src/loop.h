@@ -29,6 +29,9 @@ This file is part of walld.
 #include <errno.h>
 #include <syslog.h>
 
+//new stuff
+#include <event2/event.h>
+
 #include "config.h"
 #include "list.h"
 
@@ -56,12 +59,37 @@ struct _pre_init_stuff {
 	linked_node* picture_list;
 };
 
+typedef struct _events_box events_box;
+
+struct _events_box {
+	struct event_base* base;
+	struct event* signal_sigquit;
+	struct event* signal_sigterm;
+	struct event* signal_sigint;
+	struct event* signal_sighup;
+	struct event* signal_sigusr1;
+	struct event* signal_sigusr2;
+	struct event* timer;
+};
+
 typedef struct _loop_context loop_context;
 
 struct _loop_context {
 	pre_init_stuff* info;
 
-	sigset_t sigs;
+	linked_node* current;
+
+	char** env;
+
+	size_t env_len;
+
+	char** xrdb_argv;
+
+	size_t xrdb_len;
+
+	struct timeval* seconds;
+
+	events_box* event_box;
 };
 
 int event_loop_run(loop_context* context);
@@ -72,5 +100,12 @@ char** prep_enviroment(const char* display, const char* x_auth, const char* home
 pre_init_stuff* regen_config(pre_init_stuff* info);
 void free_env(char** env, size_t env_len);
 char** prep_xrdb_argv(linked_node* node, size_t* xrdb_len);
+
+//callbacks
+static void sig_int_quit_term_cb(evutil_socket_t sig, short events, void* user_data);
+static void sighup_cb(evutil_socket_t sig, short events, void* user_data);
+static void sigusr1_cb(evutil_socket_t sig, short events, void* user_data);
+static void sigusr2_cb(evutil_socket_t sig, short events, void* user_data);
+static void timer_expire_cb(evutil_socket_t fd, short events, void* user_data);
 
 #endif /* LOOP_H */
