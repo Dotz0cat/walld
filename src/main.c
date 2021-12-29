@@ -26,48 +26,48 @@ int main(int argc, char** argv) {
 	setenv("KMP_LOCK_KIND", "futex", 1);
 	#endif
 
-	signal(SIGHUP, SIG_IGN);
-	signal(SIGCHLD, SIG_IGN);
-	signal(SIGUSR1, SIG_IGN);
-	signal(SIGUSR2, SIG_IGN);
+	// signal(SIGHUP, SIG_IGN);
+	// signal(SIGCHLD, SIG_IGN);
+	// signal(SIGUSR1, SIG_IGN);
+	// signal(SIGUSR2, SIG_IGN);
 
-	signal(SIGTERM, SIG_IGN);
-	signal(SIGQUIT, SIG_IGN);
-	signal(SIGINT, SIG_IGN);
+	// signal(SIGTERM, SIG_IGN);
+	// signal(SIGQUIT, SIG_IGN);
+	// signal(SIGINT, SIG_IGN);
 
-	sigset_t sigs;
+	// sigset_t sigs;
 
-	if (sigemptyset(&sigs) != 0) {
-		abort();
-	}
+	// if (sigemptyset(&sigs) != 0) {
+	// 	abort();
+	// }
 
-	if (sigaddset(&sigs, SIGHUP) != 0) {
-		abort();
-	}
+	// if (sigaddset(&sigs, SIGHUP) != 0) {
+	// 	abort();
+	// }
 
-	if (sigaddset(&sigs, SIGUSR1) != 0) {
-		abort();
-	}
+	// if (sigaddset(&sigs, SIGUSR1) != 0) {
+	// 	abort();
+	// }
 
-	if (sigaddset(&sigs, SIGUSR2) != 0) {
-		abort();
-	}
+	// if (sigaddset(&sigs, SIGUSR2) != 0) {
+	// 	abort();
+	// }
 
-	if (sigaddset(&sigs, SIGTERM) != 0) {
-		abort();
-	}
+	// if (sigaddset(&sigs, SIGTERM) != 0) {
+	// 	abort();
+	// }
 
-	if (sigaddset(&sigs, SIGQUIT) != 0) {
-		abort();
-	}
+	// if (sigaddset(&sigs, SIGQUIT) != 0) {
+	// 	abort();
+	// }
 
-	if (sigaddset(&sigs, SIGINT) != 0) {
-		abort();
-	}
+	// if (sigaddset(&sigs, SIGINT) != 0) {
+	// 	abort();
+	// }
 
-	if (sigprocmask(SIG_BLOCK, &sigs, NULL) != 0) {
-		abort();
-	}
+	// if (sigprocmask(SIG_BLOCK, &sigs, NULL) != 0) {
+	// 	abort();
+	// }
 
 	//get opt stuff
 	//sperate function?
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
 
 	context->info = info;
 
-	context->sigs = sigs;
+	//context->sigs = sigs;
 
 	syslog(LOG_NOTICE, "Walld is started");
 

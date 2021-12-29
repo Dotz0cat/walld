@@ -1,6 +1,6 @@
 CFLAGS?= -O2 -g
-CPPFLAGS= $(shell pkg-config --cflags libconfig MagickWand)
-LDLIBS= $(shell pkg-config --libs libconfig MagickWand) -lm
+CPPFLAGS= $(shell pkg-config --cflags libconfig MagickWand libevent)
+LDLIBS= $(shell pkg-config --libs libconfig MagickWand libevent) -lm
 
 SRCDIR= src
 OBJDIR= obj
