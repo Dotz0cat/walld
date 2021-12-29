@@ -6,7 +6,7 @@ Walld automatically changes the wallpaper. It sets the wallpaper through feh. It
 
 Walld is mainly intended for use on ArchLinux.
 
-Walld has a feature that grabs the 16 most prominent colors from the wallpaper that it has set. Walld puts them in a file located at $HOME/.walld/colors. This file can be included in your .Xresources. Walld then reloads your .Xresource with xrdb.
+Walld has a feature that grabs the 16 most prominent colors from the wallpaper that it has set. Walld puts them in a file located at $HOME/.walld/colors. This file can be included in your .Xresources. Walld then reloads your .Xresources with xrdb.
 
 ## Usage
 
