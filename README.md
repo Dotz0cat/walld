@@ -1,6 +1,12 @@
 # Walld
 
-A wallpaper daemon. Walld automatically sets and changes the wallpaper. It sets the wallpaper through feh. It changes the wallpaper by default every 30 minutes. It also has a feature that grabs the 16 most prominent colors from the wallpaper that it has set. It then modifies the colors according to your preferences in the config file. After the colors have been modified, walld puts them in a file located at $HOME/.walld/colors. You can include this file in your .Xresources. Walld as a convenience then reloads your .Xresource with xrdb.
+A wallpaper daemon. 
+
+Walld automatically changes the wallpaper. It sets the wallpaper through feh. It changes the wallpaper by default every 30 minutes. 
+
+Walld is mainly intended for use on ArchLinux.
+
+Walld has a feature that grabs the 16 most prominent colors from the wallpaper that it has set. Walld puts them in a file located at $HOME/.walld/colors. This file can be included in your .Xresources. Walld then reloads your .Xresource with xrdb.
 
 ## Usage
 
