@@ -89,6 +89,10 @@ Walld uses libconfig for handling config files.
 | SIGUSR1| Advance the wallpapers by one |
 | SIGUSR2| Reshuffle wallpapers |
 
+## Contributing
+
+Pull requests are welcome. Open an issue for anything big.
+
 ## License
 This project is released under the GNU Public License Version 3 or Later.
 
