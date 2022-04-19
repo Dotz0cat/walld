@@ -1,5 +1,5 @@
 /*
-Copyright 2021 Dotz0cat
+Copyright 2021-2022 Dotz0cat
 
 This file is part of walld.
 
@@ -47,6 +47,8 @@ struct _settings {
 	char* x_auth;
 
 	char* display;
+
+	int screens;
 
 	linked_node* sources;
 
