@@ -1,5 +1,5 @@
 /*
-Copyright 2021 Dotz0cat
+Copyright 2021-2022 Dotz0cat
 
 This file is part of walld.
 
@@ -33,6 +33,6 @@ This file is part of walld.
 #include "loop.h"
 
 static void init_daemon(const char* home_dir);
-static pre_init_stuff* pre_init(char* config, int time, char* source);
+static pre_init_stuff* pre_init(char* config, int time, char* source, int monitors);
 
 #endif /* MAIN_H */

@@ -48,7 +48,7 @@ struct _settings {
 
 	char* display;
 
-	int screens;
+	int monitors;
 
 	linked_node* sources;
 

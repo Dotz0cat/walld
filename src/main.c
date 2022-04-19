@@ -1,5 +1,5 @@
 /*
-Copyright 2021 Dotz0cat
+Copyright 2021-2022 Dotz0cat
 
 This file is part of walld.
 
@@ -29,9 +29,10 @@ int main(int argc, char** argv) {
 	int time_minutes = 0;
 	char* config_from_cmd_line = NULL;
 	char* source_from_line = NULL;
+	int monitors = 0;
 	int opt = 0;
 
-	while((opt = getopt(argc, argv, "c:t:s:")) != -1) {
+	while((opt = getopt(argc, argv, "c:t:s:m:")) != -1) {
 		switch(opt) {
 			case 'c':
 				config_from_cmd_line = strdup(optarg);
@@ -42,8 +43,11 @@ int main(int argc, char** argv) {
 			case 's':
 				source_from_line = strdup(optarg);
 				break;
+			case 'm':
+				monitors = atoi(optarg);
+				break;
 			default: /* ? */
-				fprintf(stderr, "Usage: %s [-c config] [-t time] [-s source]\r\n", argv[0]);
+				fprintf(stderr, "Usage: %s [-c config] [-t time] [-s source] [-m monitors]\r\n", argv[0]);
 				return EXIT_FAILURE;
 		}
 	}
@@ -51,7 +55,7 @@ int main(int argc, char** argv) {
 	magick_start(argv[1]);
 	magick_threads(1);
 
-	pre_init_stuff* info = pre_init(config_from_cmd_line, time_minutes, source_from_line);
+	pre_init_stuff* info = pre_init(config_from_cmd_line, time_minutes, source_from_line, monitors);
 
 	init_daemon(info->home_dir);
 
@@ -184,7 +188,7 @@ static void init_daemon(const char* home_dir) {
 	openlog("walld", LOG_PID, LOG_DAEMON);
 }
 
-static pre_init_stuff* pre_init(char* config, int time, char* source) {
+static pre_init_stuff* pre_init(char* config, int time, char* source, int monitors) {
 
 	pre_init_stuff* info = malloc(sizeof(pre_init_stuff));
 
@@ -232,6 +236,8 @@ static pre_init_stuff* pre_init(char* config, int time, char* source) {
 	info->options = read_config(info->config, home, info->source);
 
 	info->time = time;
+
+	info->monitors = monitors;
 
 	//config file takes piority over enviroment variables
 	if (info->options->x_auth != NULL) {

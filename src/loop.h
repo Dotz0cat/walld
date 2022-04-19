@@ -56,6 +56,9 @@ struct _pre_init_stuff {
 	//only used when the time is passed on command line
 	int time;
 
+	//only used when passed on comand line
+	int monitors;
+
 	linked_node* picture_list;
 };
 
@@ -104,7 +107,7 @@ char** prep_enviroment(const char* display, const char* x_auth, const char* home
 pre_init_stuff* regen_config(pre_init_stuff* info);
 void free_env(char** env, size_t env_len);
 char** prep_xrdb_argv(linked_node* node, size_t* xrdb_len);
-char** prep_feh_argv(const char* bg_style, linked_node* node, int screens, size_t* feh_len);
+char** prep_feh_argv(const char* bg_style, linked_node* node, int monitors, size_t* feh_len);
 void edit_feh_argv(char** feh_argv, linked_node* node, size_t feh_len);
 void free_feh_argv(char** feh_argv);
 
