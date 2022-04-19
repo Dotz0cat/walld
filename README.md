@@ -15,22 +15,26 @@ Values passed by arguments will take priority over values in the config.
 
 `$ walld`
 
-`Usage: walld [-c config] [-t time] [-s source]`
+`Usage: walld [-c config] [-t time] [-s source] [-m monitors]`
 
 A custom config can be passed with `-c`
 
 A custom time can be passed with `-t`
 
 A custom source can be passed with `-s`
+
+A custom amount of monitors to display on can be passed with `-m`
 See Config section for more info
 
 ## Installation
 
-It is available on the arch AUR.
+It is available on the Arch AUR and the Gentoo guru overlay.
 
 find it under
 
 `walld`
+
+`app-misc/walld`
 
 Walld can also be installed by makefile
 
@@ -69,6 +73,7 @@ Walld uses libconfig for handling config files.
 | :----------- | ------- | ----------- |
 | Colors | This tells walld whether or not to generate colors and put them in a file located at $HOME/.walld/colors | FALSE |
 | Dark | When walld generates colors, it modifies them to make them darker or lighter. If Dark is true it make the colors better fit a dark color scheme. If it is false it makes the colors fit a lighter color scheme. | TRUE |
+| Monitors | This tells walld how many diffrent monitors to display a wallpaper on. | 1 |
 | Use-xrdb | Set this to true to have walld automatically reload your Xresources when it generates a new color file. | FALSE |
 | Minutes | This tells walld how many minutes to wait before changing the wallpaper. | 30 |
 | Source_to_use | Walld can use many different sources for images. This tells walld what source to use. | "default" |

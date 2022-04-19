@@ -1,5 +1,5 @@
 /*
-Copyright 2021 Dotz0cat
+Copyright 2021-2022 Dotz0cat
 
 This file is part of walld.
 
@@ -56,6 +56,9 @@ struct _pre_init_stuff {
 	//only used when the time is passed on command line
 	int time;
 
+	//only used when passed on comand line
+	int monitors;
+
 	linked_node* picture_list;
 };
 
@@ -79,6 +82,10 @@ struct _loop_context {
 
 	linked_node* current;
 
+	char** feh_argv;
+
+	size_t feh_len;
+
 	char** env;
 
 	size_t env_len;
@@ -93,13 +100,16 @@ struct _loop_context {
 };
 
 int event_loop_run(loop_context* context);
-static inline void feh_exec(const char* path, const char* bg_style, const char* image, char** env);
+static inline void feh_exec(const char* path, char** feh_argv, char** env);
 static inline void write_color_file(const char* home_dir, const char* image, int dark);
 static inline void xrdb_exec(const char* path, char** xrdb_argv);
 char** prep_enviroment(const char* display, const char* x_auth, const char* home, size_t* size);
 pre_init_stuff* regen_config(pre_init_stuff* info);
 void free_env(char** env, size_t env_len);
 char** prep_xrdb_argv(linked_node* node, size_t* xrdb_len);
+char** prep_feh_argv(const char* bg_style, linked_node* node, int monitors, size_t* feh_len);
+void edit_feh_argv(char** feh_argv, linked_node* node, size_t feh_len);
+void free_feh_argv(char** feh_argv);
 
 //callbacks
 static void sig_int_quit_term_cb(evutil_socket_t sig, short events, void* user_data);

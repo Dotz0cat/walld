@@ -1,5 +1,5 @@
 /*
-Copyright 2021 Dotz0cat
+Copyright 2021-2022 Dotz0cat
 
 This file is part of walld.
 
@@ -32,6 +32,7 @@ settings* read_config(const char* config_file, const char* home_dir, const char*
 	const char* x_auth;
 	const char* display;
 	int minutes;
+	int monitors;
 	const char* feh_path;
 	const char* xrdb_path;
 	const char* xresources;
@@ -114,6 +115,13 @@ settings* read_config(const char* config_file, const char* home_dir, const char*
 	}
 	else {
 		options->display = NULL;
+	}
+
+	if (config_lookup_int(&config, "monitors", &monitors)) {
+		options->monitors = monitors;
+	}
+	else {
+		options->monitors = 1;
 	}
 
 	if (config_lookup_string(&config, "feh-path", &feh_path)) {
@@ -306,6 +314,11 @@ void produce_default_config(const char* output_file, const char* home_dir) {
 
 	minutes = config_setting_add(root, "minutes", CONFIG_TYPE_INT);
 	config_setting_set_int(minutes, 30);
+
+	config_setting_t* monitors;
+
+	monitors = config_setting_add(root, "monitors", CONFIG_TYPE_INT);
+	config_setting_set_int(monitors, 1);
 
 	config_setting_t* source;
 

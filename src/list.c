@@ -1,5 +1,5 @@
 /*
-Copyright 2021 Dotz0cat
+Copyright 2021-2022 Dotz0cat
 
 This file is part of walld.
 
@@ -56,6 +56,16 @@ linked_node* wind_to_tail(linked_node* node) {
 	}
 
 	return node;
+}
+
+linked_node* wind_to_x(linked_node* node, int x) {
+	linked_node* head = node;
+
+	for (int i = 0; i < x; i++) {
+		head = head->next;		
+	}
+
+	return head;
 }
 
 void free_list(linked_node* head) {
