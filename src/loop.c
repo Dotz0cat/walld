@@ -64,6 +64,10 @@ int event_loop_run(loop_context* context) {
 
 	if (!context->event_box->timer || event_add(context->event_box->timer, context->seconds) < 0) abort();
 
+	context->feh_len = 0;
+
+	context->feh_argv = prep_feh_argv(context->info->options->bg_style, context->current, context->info->options->screens, &(context->feh_len));
+
 	context->env_len = 0;
 
 	context->env = prep_enviroment(context->info->display, context->info->x_auth, context->info->home_dir, &(context->env_len));
@@ -72,7 +76,7 @@ int event_loop_run(loop_context* context) {
 
 	context->xrdb_argv = prep_xrdb_argv(context->info->options->xrdb_argv, &(context->xrdb_len));
 
-	feh_exec(context->info->options->feh_path, context->info->options->bg_style, context->current->image, context->env);
+	feh_exec(context->info->options->feh_path, context->feh_argv, context->env);
 	if (context->info->options->colors != 0) {
 		write_color_file(context->info->home_dir, context->current->image, context->info->options->dark);
 
@@ -80,7 +84,9 @@ int event_loop_run(loop_context* context) {
 			xrdb_exec(context->info->options->xrdb_path, context->xrdb_argv);
 		}
 	}
-	context->current = context->current->next;
+	context->current = wind_to_x(context->current, context->info->options->screens);
+
+	edit_feh_argv(context->feh_argv, context->current, context->feh_len);
 
 	event_base_loop(context->event_box->base, EVLOOP_NO_EXIT_ON_EMPTY);
 
@@ -103,6 +109,7 @@ int event_loop_run(loop_context* context) {
 
 	event_base_free(context->event_box->base);
 
+	free_feh_argv(context->feh_argv);
 	free_env(context->env, context->env_len);
  	free_env(context->xrdb_argv, context->xrdb_len);
 
@@ -112,7 +119,22 @@ int event_loop_run(loop_context* context) {
 	return 0;
 }
 
-static inline void feh_exec(const char* path, const char* bg_style, const char* image, char** env) {
+// static inline void feh_exec(const char* path, const char* bg_style, const char* image, char** env) {
+
+// 	pid_t feh_pid;
+
+// 	feh_pid = fork();
+
+// 	if (feh_pid < 0) {
+// 		abort();
+// 	}
+
+// 	if (feh_pid == 0) {
+// 		execle(path, "walld-feh", bg_style, "--no-fehbg", image, NULL, env);
+// 	}
+// }
+
+static inline void feh_exec(const char* path, char** feh_argv, char** env) {
 
 	pid_t feh_pid;
 
@@ -123,7 +145,7 @@ static inline void feh_exec(const char* path, const char* bg_style, const char* 
 	}
 
 	if (feh_pid == 0) {
-		execle(path, "walld-feh", bg_style, "--no-fehbg", image, NULL, env);
+		execve(path, feh_argv, env);
 	}
 }
 
@@ -325,6 +347,55 @@ char** prep_xrdb_argv(linked_node* node, size_t* xrdb_len) {
 	return list_to_null_termed_string_array(node, xrdb_len);
 }
 
+char** prep_feh_argv(const char* bg_style, linked_node* node, int screens, size_t* feh_len) {
+	char** feh_argv;
+
+	//it needs 4 as a starting size.
+	//1 for the argv1 "walld-feh" 1 for bg_style 1 for "--no-fehbg" 1 for null
+	int count = 4;
+	count = count + screens;
+
+	feh_argv = malloc(count * sizeof(char*));
+
+	*feh_len = count;
+
+	feh_argv[0] = strdup("walld-feh");
+	feh_argv[1] = strdup(bg_style);
+	feh_argv[2] = strdup("--no-fehbg");
+
+	linked_node* add_head = node;
+
+	for (int i = 3; i < count - 1; i++) {
+		feh_argv[i] = add_head->image;
+		add_head = add_head->next;
+	}
+
+	feh_argv[count - 1] = NULL;
+
+	return feh_argv;
+}
+
+void edit_feh_argv(char** feh_argv, linked_node* node, size_t feh_len) {
+	linked_node* add_head = node;
+
+	for (int i = 3; i < (int) feh_len - 1; i++) {
+		feh_argv[i] = add_head->image;
+		add_head = add_head->next;
+	}
+}
+
+void free_feh_argv(char** feh_argv) {
+	//elements 3 to i-1 are owned by others i is null
+	if (feh_argv != NULL) {
+		for (size_t i = 0; i < 3; i++) {
+			if (feh_argv[i] != NULL) {
+				free(feh_argv[i]);
+			}
+		}
+		free(feh_argv);
+	}
+}
+
 static void sig_int_quit_term_cb(evutil_socket_t sig, short events, void* user_data) {
 	loop_context* context = (loop_context*) user_data;
 
@@ -368,7 +439,12 @@ static void sighup_cb(evutil_socket_t sig, short events, void* user_data) {
 	context->current = context->info->picture_list;
 	context->current = shuffle(context->current);
 
-	feh_exec(context->info->options->feh_path, context->info->options->bg_style, context->current->image, context->env);
+	//rebuild feh argv
+	free_feh_argv(context->feh_argv);
+
+	context->feh_argv = prep_feh_argv(context->info->options->bg_style, context->current, context->info->options->screens, &(context->feh_len));
+
+	feh_exec(context->info->options->feh_path, context->feh_argv, context->env);
 	if (context->info->options->colors != 0) {
 		write_color_file(context->info->home_dir, context->current->image, context->info->options->dark);
 
@@ -376,7 +452,9 @@ static void sighup_cb(evutil_socket_t sig, short events, void* user_data) {
 			xrdb_exec(context->info->options->xrdb_path, context->xrdb_argv);
 		}
 	}
-	context->current = context->current->next;
+	context->current = wind_to_x(context->current, context->info->options->screens);
+
+	edit_feh_argv(context->feh_argv, context->current, context->feh_len);
 
 	syslog(LOG_NOTICE, "config regened");
 }
@@ -386,7 +464,7 @@ static void sigusr1_cb(evutil_socket_t sig, short events, void* user_data) {
 
 	syslog(LOG_NOTICE, "SIGUSR1 has been recived: skiping ahead");
 	//skip ahead
-	feh_exec(context->info->options->feh_path, context->info->options->bg_style, context->current->image, context->env);
+	feh_exec(context->info->options->feh_path, context->feh_argv, context->env);
 	if (context->info->options->colors != 0) {
 		write_color_file(context->info->home_dir, context->current->image, context->info->options->dark);
 
@@ -394,7 +472,9 @@ static void sigusr1_cb(evutil_socket_t sig, short events, void* user_data) {
 			xrdb_exec(context->info->options->xrdb_path, context->xrdb_argv);
 		}
 	}
-	context->current = context->current->next;
+	context->current = wind_to_x(context->current, context->info->options->screens);
+
+	edit_feh_argv(context->feh_argv, context->current, context->feh_len);
 
 	//reprime timer
 	if (context->info->time > 0) {
@@ -420,7 +500,7 @@ static void sigusr2_cb(evutil_socket_t sig, short events, void* user_data) {
 	syslog(LOG_NOTICE, "SIGUSR2 has been recived: reshuffling picture list");
 	context->current = shuffle(context->current);
 
-	feh_exec(context->info->options->feh_path, context->info->options->bg_style, context->current->image, context->env);
+	feh_exec(context->info->options->feh_path, context->feh_argv, context->env);
 	if (context->info->options->colors != 0) {
 		write_color_file(context->info->home_dir, context->current->image, context->info->options->dark);
 
@@ -428,7 +508,9 @@ static void sigusr2_cb(evutil_socket_t sig, short events, void* user_data) {
 			xrdb_exec(context->info->options->xrdb_path, context->xrdb_argv);
 		}
 	}
-	context->current = context->current->next;
+	context->current = wind_to_x(context->current, context->info->options->screens);
+
+	edit_feh_argv(context->feh_argv, context->current, context->feh_len);
 
 	//reprime timer
 	if (context->info->time > 0) {
@@ -450,7 +532,7 @@ static void sigusr2_cb(evutil_socket_t sig, short events, void* user_data) {
 static void timer_expire_cb(evutil_socket_t fd, short events, void* user_data) {
 	loop_context* context = (loop_context*) user_data;
 
-	feh_exec(context->info->options->feh_path, context->info->options->bg_style, context->current->image, context->env);
+	feh_exec(context->info->options->feh_path, context->feh_argv, context->env);
 	if (context->info->options->colors != 0) {
 		write_color_file(context->info->home_dir, context->current->image, context->info->options->dark);
 
@@ -458,5 +540,7 @@ static void timer_expire_cb(evutil_socket_t fd, short events, void* user_data) {
 			xrdb_exec(context->info->options->xrdb_path, context->xrdb_argv);
 		}
 	}
-	context->current = context->current->next;
+	context->current = wind_to_x(context->current, context->info->options->screens);
+
+	edit_feh_argv(context->feh_argv, context->current, context->feh_len);
 }
