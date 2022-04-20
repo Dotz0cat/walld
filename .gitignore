@@ -1,3 +1,5 @@
 /obj
 walld
 .TODO
+/builddir
+Makefile
