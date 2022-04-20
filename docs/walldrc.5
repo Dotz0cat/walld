@@ -1,0 +1,129 @@
+.TH walldrc 5 2022-04-19
+.SH NAME
+walldrc \- walld configuration file
+.SH DESCRIPTION
+walldrc is located at
+.I ~/.walld/.walldrc
+it can be used to configure 
+.BR walld(1)
+
+.BR walld(1)
+uses libconfig to handle configs
+.SH OPTIONS
+.TP
+.I colors
+.RS
+This tells walld whether or not to generate colors and put them in a file located at 
+.I $HOME/.walld/colors
+.RS
+.I Default=FALSE
+.RE
+.RE
+.I dark
+.RS
+When walld generates colors, it modifies them to make them darker or lighter. If Dark is true it make the colors better fit a dark color scheme. If it is false it makes the colors fit a lighter color scheme.
+.RS
+.I Default=TRUE
+.RE
+.RE
+.I monitors
+.RS
+This tells walld how many diffrent monitors to display a wallpaper on. see
+.BR feh(1)
+for more details
+.RS
+.I Default=1
+.RE
+.RE
+.I use-xrdb
+.RS
+Set this to true to have walld automatically reload your Xresources when it generates a new color file.
+.RS
+.I Default=FALSE
+.RE
+.RE
+.I minutes
+.RS
+The interval between wallpaper changes. This is in minutes. It can be 0
+.RS
+.I Default=30
+.RE
+.RE
+.I source_to_use
+.RS
+Walld can use many different sources for images. This tells walld what source to use.
+.RS
+.I Default="default"
+.RE
+.RE
+.I source
+.RS
+This is the source that was selected with
+.I source_to_use.
+It can contain files, URLs, or even libconfig lists of files, URLs, or more files. It can hold as many members as needed.
+.RS
+.I Default="$HOME/.walld/images"
+.RE
+.RE
+.I feh\-path
+.RS
+This is where the feh executable is located on the system.
+.RS
+.I Default="/usr/bin/feh"
+.RE
+.RE
+.I bg\-style
+.RS
+This is the 
+.I \-\-bg\-style 
+that walld passes to feh. see
+.BR feh(1)
+for more
+.RS
+.I Default="--bg-scale"
+.RE
+.RE
+.I XAUTHORITY
+.RS
+.BR walld(1)
+usually gets this from environment variables. If you have something custom you can set it here.
+.RS
+.I Default=unset
+.RE
+.RE
+.I display
+.RS
+Walld usually gets this from environment variables. If you have something custom you can set it here. It is used to tell 
+.BR feh(1)
+what display to set the wallpaper on.
+.RS
+.I Default=unset
+.RE
+.RE
+.I xrdb\-path
+.RS
+This is where the xrdb executable is located. If it is used to reload Xresources.
+.RS
+.I Default="/usr/bin/xrdb"
+.RE
+.RE
+.I xrdb\-args
+.RS
+These are the arguments passed to xrdb. If you have something custom you can set it here. see
+.BR xrdb(1)
+for more info
+.RS
+.I Default="--load"
+.RE
+.RE
+.I xresources
+.RS
+This is your .Xresources that xrdb can load. If you have something custom you can set it here.
+.RS
+.I Default="$HOME/.Xresources"
+.RE
+.RE
+.SH AUTHORS
+Dotz0cat <Dotz0cat@gmail.com>
+.SH SEE ALSO
+.BR walld(1)

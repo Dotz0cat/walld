@@ -1,0 +1,42 @@
+.TH walld 1 2022-04-19
+.SH NAME
+walld \- a wallpaper daemon
+.SH SYNOPSIS
+.B walld 
+[\fB\-c\fR \fIconfig\fR] [\fB\-t\fR \fItime\fR] [\fB\-s\fR \fIsource\fR] [\fB\-m\fR \fImonitors\fR]
+.SH DESCRIPTION
+.B walld
+automatically changes the wallpaper. It sets the wallpaper through 
+.BR feh(1).
+It changes the wallpaper by default every 30 minutes.
+.SH OPTIONS
+.IP "-c config"
+Set a custom config
+.IP "-t time"
+Set a custom interval to change wallpapers
+.IP "-s source"
+Set a custom source to get wallpapers from in the config
+.IP "-m monitors"
+Set the number of monitors your system has to display a diffrent wallpaper on each one
+.SH FILES
+.I ~/.walld
+.RS
+A directory for walld files
+.RE
+.I ~/.walld/.walldrc
+.RS
+The default config file for walld see
+.BR walldrc(5)
+for formatting.
+.RE
+.I ~/.walld/images
+.RS
+The default image directory for
+.BR walld(1)
+.RE
+.SH BUGS
+Bug reports are always welcome on github
+.SH AUTHORS
+Dotz0cat <Dotz0cat@gmail.com>
+.SH SEE ALSO
+.BR walldrc(5)
