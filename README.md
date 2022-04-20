@@ -55,9 +55,11 @@ xorg-xrdb
 
 1. Download latest release from Github.
 
-2. `$ make`
+2. `meson --prefix /usr --buildtype=plain builddir`
 
-3. `$ make PREFIX="/install/Path" install`
+3. `meson compile -C builddir`
+
+4. `meson install -C builddir`
 
 ## Config
 
