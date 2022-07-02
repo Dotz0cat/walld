@@ -80,11 +80,11 @@ Walld uses libconfig for handling config files.
 | Minutes | This tells walld how many minutes to wait before changing the wallpaper. | 30 |
 | Source_to_use | Walld can use many different sources for images. This tells walld what source to use. | "default" |
 | Default | This is the default source for walld to use. | "$HOME/.walld/images" |
-| Feh-path | This is where the feh executable is located. | "/usr/bin/feh" |
+| Feh-path | This is where the feh executable is located. | not set |
 | Bg-style | This is an option that walld passes to feh when it sets the wallpaper. | "--bg-scale" |
 | XAUTHORITY | Walld usually gets this from environment variables. If you have something custom you can set it here. | not set |
 | Display | Walld usually gets this from environment variables. If you have something custom you can set it here. It is used to tell feh what display to set the wallpaper on. | not set |
-| Xrdb-path | This is where the xrdb executable is located. | "/usr/bin/xrdb" |
+| Xrdb-path | This is where the xrdb executable is located. | not set |
 | Xrdb-args | These are the arguments passed to xrdb. If you have something custom you can set it here. | "--load" |
 | Xresources | This is your .Xresources that xrdb will load. If you have something custom you can set it here. | "$HOME/.Xresources" |
 
