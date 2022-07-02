@@ -1,5 +1,5 @@
 /*
-Copyright 2021 Dotz0cat
+Copyright 2021-2022 Dotz0cat
 
 This file is part of walld.
 
@@ -21,6 +21,22 @@ This file is part of walld.
 
 int event_loop_run(loop_context* context) {
 	context->current = context->info->picture_list;
+
+	//set feh path from $PATH if it was not put into config
+	//may guard against a use after free. I dont want to find out
+	if (context->info->options->feh_path != NULL) {
+		context->feh_path = strdup(context->info->options->feh_path);
+	}
+	else {
+		context->feh_path = strdup(context->info->feh_path);
+	}
+
+	if (context->info->options->xrdb_path != NULL) {
+		context->xrdb_path = strdup(context->info->options->xrdb_path);
+	}
+	else {
+		context->xrdb_path = strdup(context->info->xrdb_path);
+	}
 
 	context->event_box = malloc(sizeof(events_box));
 
@@ -84,12 +100,12 @@ int event_loop_run(loop_context* context) {
 
 	context->xrdb_argv = prep_xrdb_argv(context->info->options->xrdb_argv, &(context->xrdb_len));
 
-	feh_exec(context->info->options->feh_path, context->feh_argv, context->env);
+	feh_exec(context->feh_path, context->feh_argv, context->env);
 	if (context->info->options->colors != 0) {
 		write_color_file(context->info->home_dir, context->current->image, context->info->options->dark);
 
 		if (context->info->options->xrdb_use != 0) {
-			xrdb_exec(context->info->options->xrdb_path, context->xrdb_argv);
+			xrdb_exec(context->xrdb_path, context->xrdb_argv);
 		}
 	}
 
@@ -148,6 +164,7 @@ static inline void feh_exec(const char* path, char** feh_argv, char** env) {
 
 	if (feh_pid == 0) {
 		execve(path, feh_argv, env);
+		syslog(LOG_NOTICE, "feh was not in your path. the feh path can also be defined in the config");
 	}
 }
 
@@ -166,6 +183,8 @@ static inline void xrdb_exec(const char* path, char** xrdb_argv) {
 
 	if (xrdb_pid == 0) {
 		execvp(path, xrdb_argv);
+		syslog(LOG_NOTICE, "xrdb was not in your path. the xrdb path can also be defined in the config");
+		syslog(LOG_NOTICE, "Could xrdb not be installed?");
 	}
 }
 
@@ -441,6 +460,25 @@ static void sighup_cb(evutil_socket_t sig, short events, void* user_data) {
 	context->current = context->info->picture_list;
 	context->current = shuffle(context->current);
 
+	free(context->feh_path);
+	free(context->xrdb_path);
+
+	//I love strdup, I really really love strdup
+	//may guard against a use after free. I dont want to find out
+	if (context->info->options->feh_path != NULL) {
+		context->feh_path = strdup(context->info->options->feh_path);
+	}
+	else {
+		context->feh_path = strdup(context->info->feh_path);
+	}
+
+	if (context->info->options->xrdb_path != NULL) {
+		context->xrdb_path = strdup(context->info->options->xrdb_path);
+	}
+	else {
+		context->xrdb_path = strdup(context->info->xrdb_path);
+	}
+
 	//rebuild feh argv
 	free_feh_argv(context->feh_argv);
 
@@ -454,12 +492,12 @@ static void sighup_cb(evutil_socket_t sig, short events, void* user_data) {
 		context->feh_argv = prep_feh_argv(context->info->options->bg_style, context->current, context->info->options->monitors, &(context->feh_len));
 	}
 	
-	feh_exec(context->info->options->feh_path, context->feh_argv, context->env);
+	feh_exec(context->feh_path, context->feh_argv, context->env);
 	if (context->info->options->colors != 0) {
 		write_color_file(context->info->home_dir, context->current->image, context->info->options->dark);
 
 		if (context->info->options->xrdb_use != 0) {
-			xrdb_exec(context->info->options->xrdb_path, context->xrdb_argv);
+			xrdb_exec(context->xrdb_path, context->xrdb_argv);
 		}
 	}
 
@@ -484,12 +522,12 @@ static void sigusr1_cb(evutil_socket_t sig, short events, void* user_data) {
 
 	syslog(LOG_NOTICE, "SIGUSR1 has been recived: skiping ahead");
 	//skip ahead
-	feh_exec(context->info->options->feh_path, context->feh_argv, context->env);
+	feh_exec(context->feh_path, context->feh_argv, context->env);
 	if (context->info->options->colors != 0) {
 		write_color_file(context->info->home_dir, context->current->image, context->info->options->dark);
 
 		if (context->info->options->xrdb_use != 0) {
-			xrdb_exec(context->info->options->xrdb_path, context->xrdb_argv);
+			xrdb_exec(context->xrdb_path, context->xrdb_argv);
 		}
 	}
 
@@ -529,12 +567,12 @@ static void sigusr2_cb(evutil_socket_t sig, short events, void* user_data) {
 	syslog(LOG_NOTICE, "SIGUSR2 has been recived: reshuffling picture list");
 	context->current = shuffle(context->current);
 
-	feh_exec(context->info->options->feh_path, context->feh_argv, context->env);
+	feh_exec(context->feh_path, context->feh_argv, context->env);
 	if (context->info->options->colors != 0) {
 		write_color_file(context->info->home_dir, context->current->image, context->info->options->dark);
 
 		if (context->info->options->xrdb_use != 0) {
-			xrdb_exec(context->info->options->xrdb_path, context->xrdb_argv);
+			xrdb_exec(context->xrdb_path, context->xrdb_argv);
 		}
 	}
 
@@ -570,12 +608,12 @@ static void sigusr2_cb(evutil_socket_t sig, short events, void* user_data) {
 static void timer_expire_cb(evutil_socket_t fd, short events, void* user_data) {
 	loop_context* context = (loop_context*) user_data;
 
-	feh_exec(context->info->options->feh_path, context->feh_argv, context->env);
+	feh_exec(context->feh_path, context->feh_argv, context->env);
 	if (context->info->options->colors != 0) {
 		write_color_file(context->info->home_dir, context->current->image, context->info->options->dark);
 
 		if (context->info->options->xrdb_use != 0) {
-			xrdb_exec(context->info->options->xrdb_path, context->xrdb_argv);
+			xrdb_exec(context->xrdb_path, context->xrdb_argv);
 		}
 	}
 

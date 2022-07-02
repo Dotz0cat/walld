@@ -22,7 +22,8 @@ This file is part of walld.
 int main(int argc, char** argv) {
 
 	//set enviroment variable to fix segfault when linked against clang's openmp
-	#ifdef __clang__
+	//no trouble on bsd. as far as I can tell. also no futex
+	#ifdef __clang__ && __linux__
 	setenv("KMP_LOCK_KIND", "futex", 1);
 	#endif
 
@@ -209,6 +210,124 @@ static pre_init_stuff* pre_init(char* config, int time, char* source, int monito
 	char* display = strdup(getenv("DISPLAY"));
 
 	info->display = display;
+
+	//get feh's path from the $PATH
+	char* path = getenv("PATH");
+
+	char* path_tok = strtok(path, ":");
+
+	int going = 0;
+
+	while(going == 0) {
+		int count = snprintf(NULL, 0, "%s%s", path_tok, "/feh");
+
+		if (count <= 0) {
+			abort();
+		}
+
+		char* file = malloc(count + 1U);
+
+		if (file == NULL) {
+			abort();
+		}
+
+		snprintf(file, count + 1U, "%s%s", path, "/feh");
+
+		int worked = access(file, X_OK);
+
+		free(file);
+
+		if (worked == 0) {
+			going = 1;
+		}
+		else {
+			path_tok = strtok(NULL, ":");
+
+			if (path_tok == NULL) {
+				going = 1;
+			}
+		}
+	}
+
+	if (path_tok != NULL) {
+		int count = snprintf(NULL, 0, "%s%s", path_tok, "/feh");
+
+		if (count <= 0) {
+			abort();
+		}
+
+		char* file = malloc(count + 1U);
+
+		if (file == NULL) {
+			abort();
+		}
+
+		snprintf(file, count + 1U, "%s%s", path, "/feh");
+
+		info->feh_path = file;
+	}
+	else {
+		//Set non NULL value so nothing fails. true on most distros
+		info->feh_path = strdup("/usr/bin/feh");
+	}
+
+	//get xrdb from the PATH
+	path_tok = strtok(path, ":");
+
+	going = 0;
+
+	while(going == 0) {
+		int count = snprintf(NULL, 0, "%s%s", path_tok, "/xrdb");
+
+		if (count <= 0) {
+			abort();
+		}
+
+		char* file = malloc(count + 1U);
+
+		if (file == NULL) {
+			abort();
+		}
+
+		snprintf(file, count + 1U, "%s%s", path, "/xrdb");
+
+		int worked = access(file, X_OK);
+
+		free(file);
+
+		if (worked == 0) {
+			going = 1;
+		}
+		else {
+			path_tok = strtok(NULL, ":");
+
+			if (path_tok == NULL) {
+				going = 1;
+			}
+		}
+	}
+
+	if (path_tok != NULL) {
+		int count = snprintf(NULL, 0, "%s%s", path_tok, "/xrdb");
+
+		if (count <= 0) {
+			abort();
+		}
+
+		char* file = malloc(count + 1U);
+
+		if (file == NULL) {
+			abort();
+		}
+
+		snprintf(file, count + 1U, "%s%s", path, "/xrdb");
+
+		info->xrdb_path = file;
+	}
+	else {
+		//Set non NULL value so nothing fails. true on most distros
+		info->xrdb_path = strdup("/usr/bin/xrdb");
+	}
 
 	if (config != NULL) {
 		info->config = config;

@@ -21,11 +21,8 @@ This file is part of walld.
 #define LOOP_H
 
 #include <stdlib.h>
-#include <sys/epoll.h>
 #include <unistd.h>
 #include <signal.h>
-#include <sys/signalfd.h>
-#include <sys/timerfd.h>
 #include <errno.h>
 #include <syslog.h>
 
@@ -59,6 +56,12 @@ struct _pre_init_stuff {
 	//only used when passed on comand line
 	int monitors;
 
+	//the feh_path from the $PATH
+	char* feh_path;
+
+	//xrdb path from the $PATH
+	char* xrdb_path;
+
 	linked_node* picture_list;
 };
 
@@ -82,6 +85,8 @@ struct _loop_context {
 
 	linked_node* current;
 
+	char* feh_path;
+
 	char** feh_argv;
 
 	size_t feh_len;
@@ -89,6 +94,8 @@ struct _loop_context {
 	char** env;
 
 	size_t env_len;
+
+	char* xrdb_path;
 
 	char** xrdb_argv;
 

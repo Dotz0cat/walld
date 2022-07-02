@@ -128,7 +128,7 @@ settings* read_config(const char* config_file, const char* home_dir, const char*
 		options->feh_path = strdup(feh_path);
 	}
 	else {
-		options->feh_path = strdup("/usr/bin/feh");
+		options->feh_path = NULL;
 	}
 
 	if (config_lookup_int(&config, "minutes", &minutes)) {
@@ -191,7 +191,7 @@ settings* read_config(const char* config_file, const char* home_dir, const char*
 		options->xrdb_path = strdup(xrdb_path);
 	}
 	else {
-		options->xrdb_path = strdup("/usr/bin/xrdb");
+		options->xrdb_path = NULL;
 	}
 
 	config_setting_t* xrdb_args;
