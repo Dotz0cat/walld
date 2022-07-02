@@ -231,7 +231,7 @@ static pre_init_stuff* pre_init(char* config, int time, char* source, int monito
 			abort();
 		}
 
-		snprintf(file, count + 1U, "%s%s", path, "/feh");
+		snprintf(file, count + 1U, "%s%s", path_tok, "/feh");
 
 		int worked = access(file, X_OK);
 
@@ -262,7 +262,7 @@ static pre_init_stuff* pre_init(char* config, int time, char* source, int monito
 			abort();
 		}
 
-		snprintf(file, count + 1U, "%s%s", path, "/feh");
+		snprintf(file, count + 1U, "%s%s", path_tok, "/feh");
 
 		info->feh_path = file;
 	}
@@ -289,7 +289,7 @@ static pre_init_stuff* pre_init(char* config, int time, char* source, int monito
 			abort();
 		}
 
-		snprintf(file, count + 1U, "%s%s", path, "/xrdb");
+		snprintf(file, count + 1U, "%s%s", path_tok, "/xrdb");
 
 		int worked = access(file, X_OK);
 
@@ -320,7 +320,7 @@ static pre_init_stuff* pre_init(char* config, int time, char* source, int monito
 			abort();
 		}
 
-		snprintf(file, count + 1U, "%s%s", path, "/xrdb");
+		snprintf(file, count + 1U, "%s%s", path_tok, "/xrdb");
 
 		info->xrdb_path = file;
 	}
