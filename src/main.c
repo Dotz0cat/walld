@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
 
 	//set enviroment variable to fix segfault when linked against clang's openmp
 	//no trouble on bsd. as far as I can tell. also no futex
-	#ifdef __clang__ && __linux__
+	#if defined(__clang__) && defined(__linux__)
 	setenv("KMP_LOCK_KIND", "futex", 1);
 	#endif
 
@@ -96,6 +96,9 @@ int main(int argc, char** argv) {
 	free_circular_list(info->picture_list);
 	free(info);
 
+	free(context->feh_path);
+	free(context->xrdb_path);
+
 	free(context);
 
 	syslog(LOG_NOTICE, "Walld has quit");
@@ -146,46 +149,10 @@ static void init_daemon(const char* home_dir) {
 		close(x);
 	}
 
-	int char_count = snprintf(NULL, 0, "%s%s", home_dir, "/.walld/log");
-
-	if (char_count <= 0) {
-		abort();
-	}
-
-	char* log_file = malloc(char_count + 1U);
-
-	if (log_file == NULL) {
-		abort();
-	}
-
-	snprintf(log_file, char_count + 1U, "%s%s", home_dir, "/.walld/log");
-
-	stdin = fopen("/dev/null", "r");
-	stdout = fopen(log_file, "w");
-
-	free(log_file);
-
-	char_count = 0;
-
-	char_count = snprintf(NULL, 0, "%s%s", home_dir, "/.walld/error-log");
-
-	if (char_count <= 0) {
-		abort();
-	}
-
-	char* err_log_file = malloc(char_count + 1U);
-
-	if (err_log_file == NULL) {
-		abort();
-	}
-
-	snprintf(err_log_file, char_count + 1U, "%s%s", home_dir, "/.walld/error-log");
-
-
-	stderr = fopen(err_log_file, "w");
-
-	free(err_log_file);
-
+	fclose(stdin);
+	fclose(stdout);
+	fclose(stderr);
+	
 	openlog("walld", LOG_PID, LOG_DAEMON);
 }
 

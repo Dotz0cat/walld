@@ -28,13 +28,15 @@ See Config section for more info
 
 ## Installation
 
-It is available on the Arch AUR and the Gentoo guru overlay.
+It is available on the Arch AUR, the Gentoo guru overlay, and the Freebsd ports collection.
 
 find it under
 
 `walld`
 
 `app-misc/walld`
+
+`deskutils/walld`
 
 Walld can also be installed by makefile
 
