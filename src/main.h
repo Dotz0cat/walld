@@ -32,7 +32,7 @@ This file is part of walld.
 #include "list.h"
 #include "loop.h"
 
-static void init_daemon(const char* home_dir);
+static void init_daemon(void);
 static pre_init_stuff* pre_init(char* config, int time, char* source, int monitors);
 
 #endif /* MAIN_H */

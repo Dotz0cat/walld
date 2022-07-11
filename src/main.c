@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
 
 	pre_init_stuff* info = pre_init(config_from_cmd_line, time_minutes, source_from_line, monitors);
 
-	init_daemon(info->home_dir);
+	init_daemon();
 
 	syslog(LOG_NOTICE, "Walld is inited");
 
@@ -94,6 +94,8 @@ int main(int argc, char** argv) {
 	free(info->display);
 	free(info->config);
 	free_circular_list(info->picture_list);
+	free(info->feh_path);
+	free(info->xrdb_path);
 	free(info);
 
 	free(context->feh_path);
@@ -110,7 +112,7 @@ int main(int argc, char** argv) {
 	return EXIT_SUCCESS;
 }
 
-static void init_daemon(const char* home_dir) {
+static void init_daemon() {
 	pid_t pid;
 
 	pid = fork();
@@ -152,7 +154,7 @@ static void init_daemon(const char* home_dir) {
 	fclose(stdin);
 	fclose(stdout);
 	fclose(stderr);
-	
+
 	openlog("walld", LOG_PID, LOG_DAEMON);
 }
 
