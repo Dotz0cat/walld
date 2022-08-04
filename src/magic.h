@@ -1,5 +1,5 @@
 /*
-Copyright 2021 Dotz0cat
+Copyright 2021-2022 Dotz0cat
 
 This file is part of walld.
 
@@ -64,5 +64,7 @@ char* rgb_to_hex(const rgb* color);
 void lighten_rgb(rgb* color, float factor);
 void darken_rgb(rgb* color, float factor);
 rgb* blend_colors(rgb* color1, rgb* color2);
+char* remove_alpha(const char* hex);
+void write_default(const char* color_file);
 
 #endif /* MAGIC_H */

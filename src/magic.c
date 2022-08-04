@@ -1,5 +1,5 @@
 /*
-Copyright 2021 Dotz0cat
+Copyright 2021-2022 Dotz0cat
 
 This file is part of walld.
 
@@ -212,12 +212,15 @@ void put_colors_in_file(const char* home_dir, const char* image, int dark) {
 	} while (len != 16 && i < 40);
 
 	if (list == NULL) {
+		//write the standard colors so there is no one left without colors
+		write_default(color_file);
 		free(color_file);
 		return;
 	}
 
 	if (i >= 40) {
 		//it span too many times and did not get 16 colors
+		write_default(color_file);
 		free(color_file);
 		if (list != NULL) {
 			for (int j = 0; j < (int) len; j++) {
@@ -231,11 +234,26 @@ void put_colors_in_file(const char* home_dir, const char* image, int dark) {
 	//adjustments
 	//hsl
 
+	//for the off chance there is an alpha channel I fix it
+	char** dealpha = malloc(sizeof(char*) * len);
+
+	if (dealpha == NULL) {
+		abort();
+	}
+
+	for (int k = 0; k < (int) len; k++) {
+		dealpha[k] = remove_alpha(list[k]);
+	}
+
 	char** list2 = malloc(sizeof(char*) * len);
+
+	if (list2 == NULL) {
+		abort();
+	}
 
 	if (dark) {
 		for (int k = 0; k < (int) len; k++) {
-			list2[k] = strdup(list[k]);
+			list2[k] = strdup(dealpha[k]);
 		}
 
 		rgb* rgb1 = hex_to_rgb(list2[7]);
@@ -274,7 +292,7 @@ void put_colors_in_file(const char* home_dir, const char* image, int dark) {
 	}
 	else {
 		for (int k = 0; k < (int) len; k++) {
-			rgb* rgb1 = hex_to_rgb(list[k]);
+			rgb* rgb1 = hex_to_rgb(dealpha[k]);
 
 			hsl* hsl1 = rgb_to_hsl(rgb1);
 
@@ -291,7 +309,7 @@ void put_colors_in_file(const char* home_dir, const char* image, int dark) {
 			free(rgb2);
 		} 
 
-		rgb* rgb1 = hex_to_rgb(list[0]);
+		rgb* rgb1 = hex_to_rgb(dealpha[0]);
 		free(list2[0]);
 
 		lighten_rgb(rgb1, 0.85);
@@ -300,9 +318,9 @@ void put_colors_in_file(const char* home_dir, const char* image, int dark) {
 		free(rgb1);
 
 		free(list2[7]);
-		list2[7] = strdup(list[0]);
+		list2[7] = strdup(dealpha[0]);
 
-		rgb* rgb2 = hex_to_rgb(list[0]);
+		rgb* rgb2 = hex_to_rgb(dealpha[0]);
 		free(list2[8]);
 
 		darken_rgb(rgb2, 0.4);
@@ -311,28 +329,33 @@ void put_colors_in_file(const char* home_dir, const char* image, int dark) {
 		free(rgb2);
 
 		free(list2[15]);
-		list2[15] = strdup(list[0]);
+		list2[15] = strdup(dealpha[0]);
 
 	}
 	
 	FILE* fp = fopen(color_file, "w");
 
 	for (int j = 0; j < (int) len; j++) {
-		fprintf(fp, "color%i:\t%s\n", j, list2[j]);
+		fprintf(fp, "#define c%i %s\n", j, list2[j]);
 		free(list2[j]);
+		free(dealpha[j]);
 		free(list[j]);
 	}
 
 	fclose(fp);
 
 	free(list2);
+	free(dealpha);
 	free(list);
 	free(color_file);
 }
 
 rgb* hex_to_rgb(const char* hex_string) {
 	rgb* hex_as_rgb = malloc(sizeof(rgb));
-	
+	if (hex_as_rgb == NULL) {
+		abort();
+	}
+
 	sscanf(hex_string, "#%02x%02x%02x", &hex_as_rgb->r, &hex_as_rgb->g, &hex_as_rgb->b);
 
 	return hex_as_rgb;
@@ -340,6 +363,10 @@ rgb* hex_to_rgb(const char* hex_string) {
 
 hsl* rgb_to_hsl(const rgb* color) {
 	hsl* hsl_conv = malloc(sizeof(hsl));
+
+	if (hsl_conv == NULL) {
+		abort();
+	}
 
 	float r = color->r / 255.0;
 
@@ -389,6 +416,10 @@ hsl* rgb_to_hsl(const rgb* color) {
 
 rgb* hsl_to_rgb(const hsl* color) {
 	rgb* rgb_conv = malloc(sizeof(rgb));
+
+	if (rgb_conv == NULL) {
+		abort();
+	}
 
 	float c = (2 * fabsf(2 * color->l - 1)) * color->s;
 
@@ -446,6 +477,10 @@ rgb* hsl_to_rgb(const hsl* color) {
 char* rgb_to_hex(const rgb* color) {
 	char* hex = malloc(4096);
 
+	if (hex == NULL) {
+		abort();
+	}
+
 	snprintf(hex, 8, "#%02x%02x%02x", color->r, color->g, color->b);
 
 	//strdup trims the memory needed
@@ -476,4 +511,39 @@ rgb* blend_colors(rgb* color1, rgb* color2) {
 	rgb3->b = (unsigned int) ((color1->b * .5) + (color2->b * .5));
 
 	return rgb3;
+}
+
+char* remove_alpha(const char* hex) {
+	char* hex2 = malloc(8 * sizeof(char));
+
+	if (hex2 == NULL) {
+		abort();
+	}
+
+	memcpy(hex2, hex, 7);
+	hex2[7] = '\0';
+
+	return hex2;
+}
+
+void write_default(const char* color_file) {
+	FILE* fp = fopen(color_file, "w");
+
+	//taken from man 1 xterm
+	fprintf (fp, "#define c0 #000000\n");
+	fprintf (fp, "#define c1 #CD0000\n");
+	fprintf (fp, "#define c2 #00CD00\n");
+	fprintf (fp, "#define c3 #CDCD00\n");
+	fprintf (fp, "#define c4 #0000CD\n");
+	fprintf (fp, "#define c5 #CD00CD\n");
+	fprintf (fp, "#define c6 #00CDCD\n");
+	fprintf (fp, "#define c7 #e5e5e5\n");
+	fprintf (fp, "#define c8 #7f7f7f\n");
+	fprintf (fp, "#define c9 #FF0000\n");
+	fprintf (fp, "#define c10 #00FF00\n");
+	fprintf (fp, "#define c11 #FFFF00\n");
+	fprintf (fp, "#define c12 #ADD8E6\n");
+	fprintf (fp, "#define c13 #FF00FF\n");
+	fprintf (fp, "#define c14 #00FFFF\n");
+	fprintf (fp, "#define c15 #FFFFFF\n");
 }
