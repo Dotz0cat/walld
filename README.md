@@ -15,7 +15,7 @@ Values passed by arguments will take priority over values in the config.
 
 `$ walld`
 
-`Usage: walld [-c config] [-t time] [-s source] [-m monitors]`
+`Usage: walld [-c config] [-t time] [-s source] [-m monitors] [-v]`
 
 A custom config can be passed with `-c`
 
@@ -24,7 +24,10 @@ A custom time can be passed with `-t`
 A custom source can be passed with `-s`
 
 A custom amount of monitors to display on can be passed with `-m`
+
+Version can be got with `-v`
 See Config section for more info
+
 
 ## Installation
 
