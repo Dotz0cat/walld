@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
 	int monitors = 0;
 	int opt = 0;
 
-	while((opt = getopt(argc, argv, "c:t:s:m:")) != -1) {
+	while((opt = getopt(argc, argv, "c:t:s:m:v")) != -1) {
 		switch(opt) {
 			case 'c':
 				config_from_cmd_line = strdup(optarg);
@@ -47,8 +47,12 @@ int main(int argc, char** argv) {
 			case 'm':
 				monitors = atoi(optarg);
 				break;
+			case 'v':
+				printf("%s: version: %s\r\n", argv[0], VERSION);
+				return EXIT_SUCCESS;
+				break;
 			default: /* ? */
-				fprintf(stderr, "Usage: %s [-c config] [-t time] [-s source] [-m monitors]\r\n", argv[0]);
+				fprintf(stderr, "Usage: %s [-c config] [-t time] [-s source] [-m monitors] [-v]\r\n", argv[0]);
 				return EXIT_FAILURE;
 		}
 	}
