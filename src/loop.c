@@ -78,6 +78,8 @@ int event_loop_run(loop_context* context) {
 		context->seconds->tv_sec = context->info->options->minutes * 60;
 	}
 
+	context->seconds->tv_usec = 0;
+
 	if (!context->event_box->timer || event_add(context->event_box->timer, context->seconds) < 0) abort();
 
 	context->feh_len = 0;
@@ -443,6 +445,8 @@ static void sighup_cb(evutil_socket_t sig, short events, void* user_data) {
 		context->seconds->tv_sec = context->info->options->minutes * 60;
 	}
 
+	context->seconds->tv_usec = 0;
+
 	//reprime time
 	event_del(context->event_box->timer);
 
@@ -554,6 +558,8 @@ static void sigusr1_cb(evutil_socket_t sig, short events, void* user_data) {
 		context->seconds->tv_sec = context->info->options->minutes * 60;
 	}
 
+	context->seconds->tv_usec = 0;
+
 	// timer stuff
 	event_del(context->event_box->timer);
 
@@ -598,6 +604,8 @@ static void sigusr2_cb(evutil_socket_t sig, short events, void* user_data) {
 	else {
 		context->seconds->tv_sec = context->info->options->minutes * 60;
 	}
+
+	context->seconds->tv_usec = 0;
 
 	//timer stuff
 	event_del(context->event_box->timer);

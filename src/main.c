@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
 				monitors = atoi(optarg);
 				break;
 			case 'v':
-				printf("%s: version: %s\r\n", argv[0], VERSION);
+				printf("%s version: %s\r\n", argv[0], VERSION);
 				return EXIT_SUCCESS;
 				break;
 			default: /* ? */
