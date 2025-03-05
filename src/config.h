@@ -1,5 +1,5 @@
 /*
-Copyright 2021-2022 Dotz0cat
+Copyright 2021-2022, 2025 Dotz0cat
 
 This file is part of walld.
 
@@ -27,39 +27,34 @@ This file is part of walld.
 
 #include "list.h"
 
-typedef struct _settings settings;
-
-struct _settings {
+struct settings {
 	int colors;
 
 	int dark;
 
 	int xrdb_use;
 
-	char* feh_path;
+	char *feh_path;
 
-	char* xrdb_path;
+	char *xrdb_path;
 
 	int minutes;
 
-	char* bg_style;
+	char *bg_style;
 
-	char* x_auth;
+	char *x_auth;
 
-	char* display;
+	char *display;
 
 	int monitors;
 
-	linked_node* sources;
+	struct linked_node *sources;
 
-	linked_node* xrdb_argv;
+	struct linked_node *xrdb_argv;
 };
 
-settings* read_config(const char* config_file, const char* home_dir, const char* source_from_line);
-linked_node* list_file_parse(const char* list_file);
-void produce_default_config(const char* output_file, const char* home_dir);
-static inline int file_exsits(const char* file);
-static inline int folder_exsits(const char* folder);
-static inline void check_default_image_folder(const char* home_dir);
+struct settings *read_config(const char *config_file, const char *home_dir, const char *source_from_line);
+struct linked_node *list_file_parse(const char *list_file);
+void produce_default_config(const char *output_file, const char *home_dir);
 
 #endif /* CONFIG_H */

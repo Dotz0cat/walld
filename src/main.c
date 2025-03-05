@@ -1,5 +1,5 @@
 /*
-Copyright 2021-2022 Dotz0cat
+Copyright 2021-2022, 2025 Dotz0cat
 
 This file is part of walld.
 
@@ -17,9 +17,9 @@ This file is part of walld.
     along with walld.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "main.h"
+#include "main_private.h"
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
 
 	//set enviroment variable to fix segfault when linked against clang's openmp
 	//no trouble on bsd. as far as I can tell. also no futex
@@ -28,8 +28,8 @@ int main(int argc, char** argv) {
 	#endif
 
 	int time_minutes = 0;
-	char* config_from_cmd_line = NULL;
-	char* source_from_line = NULL;
+	char *config_from_cmd_line = NULL;
+	char *source_from_line = NULL;
 	int monitors = 0;
 	int opt = 0;
 
@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
 	magick_start(argv[1]);
 	magick_threads(1);
 
-	pre_init_stuff* info = pre_init(config_from_cmd_line, time_minutes, source_from_line, monitors);
+	struct pre_init_stuff *info = pre_init(config_from_cmd_line, time_minutes, source_from_line, monitors);
 
 	init_daemon();
 
@@ -68,8 +68,8 @@ int main(int argc, char** argv) {
 
 	magick_threads(4);
 
-	loop_context* context;
-	context = malloc(sizeof(loop_context));
+	struct loop_context *context;
+	context = malloc(sizeof(struct loop_context));
 
 	context->info = info;
 
@@ -162,32 +162,32 @@ static void init_daemon() {
 	openlog("walld", LOG_PID, LOG_DAEMON);
 }
 
-static pre_init_stuff* pre_init(char* config, int time, char* source, int monitors) {
+static struct pre_init_stuff *pre_init(char *config, int time, char *source, int monitors) {
 
-	pre_init_stuff* info = malloc(sizeof(pre_init_stuff));
+	struct pre_init_stuff* info = malloc(sizeof(struct pre_init_stuff));
 
 	char* home = getenv("HOME");
 
 	if (home == NULL) {
 		uid_t uid = getuid();
-        struct passwd* pw = getpwuid(uid);
+        struct passwd *pw = getpwuid(uid);
         home = pw->pw_dir;
 	}
 
 	info->home_dir = strdup(home);
 
-	char* x_auth = strdup(getenv("XAUTHORITY"));
+	char *x_auth = strdup(getenv("XAUTHORITY"));
 
 	info->x_auth = x_auth;
 
-	char* display = strdup(getenv("DISPLAY"));
+	char *display = strdup(getenv("DISPLAY"));
 
 	info->display = display;
 
 	//get feh's path from the $PATH
-	char* path = getenv("PATH");
+	char *path = getenv("PATH");
 
-	char* path_tok = strtok(path, ":");
+	char *path_tok = strtok(path, ":");
 
 	int going = 0;
 
@@ -198,7 +198,7 @@ static pre_init_stuff* pre_init(char* config, int time, char* source, int monito
 			abort();
 		}
 
-		char* file = malloc(count + 1U);
+		char *file = malloc(count + 1U);
 
 		if (file == NULL) {
 			abort();
@@ -229,7 +229,7 @@ static pre_init_stuff* pre_init(char* config, int time, char* source, int monito
 			abort();
 		}
 
-		char* file = malloc(count + 1U);
+		char *file = malloc(count + 1U);
 
 		if (file == NULL) {
 			abort();
@@ -256,7 +256,7 @@ static pre_init_stuff* pre_init(char* config, int time, char* source, int monito
 			abort();
 		}
 
-		char* file = malloc(count + 1U);
+		char *file = malloc(count + 1U);
 
 		if (file == NULL) {
 			abort();
@@ -287,7 +287,7 @@ static pre_init_stuff* pre_init(char* config, int time, char* source, int monito
 			abort();
 		}
 
-		char* file = malloc(count + 1U);
+		char *file = malloc(count + 1U);
 
 		if (file == NULL) {
 			abort();
@@ -312,7 +312,7 @@ static pre_init_stuff* pre_init(char* config, int time, char* source, int monito
 			abort();
 		}
 
-		char* config_file = malloc(count + 1U);
+		char *config_file = malloc(count + 1U);
 
 		if (config_file == NULL) {
 			abort();

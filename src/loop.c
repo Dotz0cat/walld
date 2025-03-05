@@ -1,5 +1,5 @@
 /*
-Copyright 2021-2022 Dotz0cat
+Copyright 2021-2022, 2025 Dotz0cat
 
 This file is part of walld.
 
@@ -17,9 +17,9 @@ This file is part of walld.
     along with walld.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "loop.h"
+#include "loop_private.h"
 
-int event_loop_run(loop_context* context) {
+int event_loop_run(struct loop_context *context) {
 	context->current = context->info->picture_list;
 
 	//set feh path from $PATH if it was not put into config
@@ -38,7 +38,7 @@ int event_loop_run(loop_context* context) {
 		context->xrdb_path = strdup(context->info->xrdb_path);
 	}
 
-	context->event_box = malloc(sizeof(events_box));
+	context->event_box = malloc(sizeof(struct events_box));
 
 	context->event_box->base = event_base_new();
 
@@ -154,7 +154,7 @@ int event_loop_run(loop_context* context) {
 	return 0;
 }
 
-static inline void feh_exec(const char* path, char** feh_argv, char** env) {
+static inline void feh_exec(const char *path, char **feh_argv, char **env) {
 
 	pid_t feh_pid;
 
@@ -170,11 +170,11 @@ static inline void feh_exec(const char* path, char** feh_argv, char** env) {
 	}
 }
 
-static inline void write_color_file(const char* home_dir, const char* image, int dark) {
+static inline void write_color_file(const char *home_dir, const char *image, int dark) {
 	put_colors_in_file(home_dir, image, dark);
 }
 
-static inline void xrdb_exec(const char* path, char** xrdb_argv) {
+static inline void xrdb_exec(const char *path, char **xrdb_argv) {
 	pid_t xrdb_pid;
 
 	xrdb_pid = fork();
@@ -190,7 +190,7 @@ static inline void xrdb_exec(const char* path, char** xrdb_argv) {
 	}
 }
 
-char** prep_enviroment(const char* display, const char* x_auth, const char* home, size_t* size) {
+char **prep_enviroment(const char *display, const char *x_auth, const char *home, size_t *size) {
 	int count = 0;
 
 	if (display != NULL) {
@@ -213,7 +213,7 @@ char** prep_enviroment(const char* display, const char* x_auth, const char* home
 
 	*size = count;
 
-	char** env = malloc(count * sizeof(char*));
+	char **env = malloc(count * sizeof(char*));
 
 
 	int index = 0;
@@ -225,7 +225,7 @@ char** prep_enviroment(const char* display, const char* x_auth, const char* home
 			abort();
 		}
 
-		char* display_string = malloc(len + 1U);
+		char *display_string = malloc(len + 1U);
 
 		if (display_string == NULL) {
 			abort();
@@ -250,7 +250,7 @@ char** prep_enviroment(const char* display, const char* x_auth, const char* home
 			abort();
 		}
 
-		char* x_auth_string = malloc(len + 1U);
+		char *x_auth_string = malloc(len + 1U);
 
 		if (x_auth_string == NULL) {
 			abort();
@@ -270,7 +270,7 @@ char** prep_enviroment(const char* display, const char* x_auth, const char* home
 			abort();
 		}
 
-		char* home_string = malloc(len + 1U);
+		char *home_string = malloc(len + 1U);
 
 		if (home_string == NULL) {
 			abort();
@@ -288,7 +288,7 @@ char** prep_enviroment(const char* display, const char* x_auth, const char* home
 	return env;
 }
 
-pre_init_stuff* regen_config(pre_init_stuff* info) {
+struct pre_init_stuff *regen_config(struct pre_init_stuff *info) {
 	//free the old options
 
 	if (info->options != NULL) {
@@ -355,7 +355,7 @@ pre_init_stuff* regen_config(pre_init_stuff* info) {
 	return info;
 }
 
-void free_env(char** env, size_t env_len) {
+void free_env(char **env, size_t env_len) {
 	if (env != NULL) {
 		for (size_t i = 0; i < env_len; i++) {
 			if (env[i] != NULL) {
@@ -366,12 +366,12 @@ void free_env(char** env, size_t env_len) {
 	}
 }
 
-char** prep_xrdb_argv(linked_node* node, size_t* xrdb_len) {
+char **prep_xrdb_argv(struct linked_node *node, size_t *xrdb_len) {
 	return list_to_null_termed_string_array(node, xrdb_len);
 }
 
-char** prep_feh_argv(const char* bg_style, linked_node* node, int monitors, size_t* feh_len) {
-	char** feh_argv;
+char **prep_feh_argv(const char *bg_style, struct linked_node *node, int monitors, size_t *feh_len) {
+	char **feh_argv;
 
 	//it needs 4 as a starting size.
 	//1 for the argv1 "walld-feh" 1 for bg_style 1 for "--no-fehbg" 1 for null
@@ -386,7 +386,7 @@ char** prep_feh_argv(const char* bg_style, linked_node* node, int monitors, size
 	feh_argv[1] = strdup(bg_style);
 	feh_argv[2] = strdup("--no-fehbg");
 
-	linked_node* add_head = node;
+	struct linked_node *add_head = node;
 
 	for (int i = 3; i < count - 1; i++) {
 		feh_argv[i] = add_head->image;
@@ -398,8 +398,8 @@ char** prep_feh_argv(const char* bg_style, linked_node* node, int monitors, size
 	return feh_argv;
 }
 
-void edit_feh_argv(char** feh_argv, linked_node* node, size_t feh_len) {
-	linked_node* add_head = node;
+void edit_feh_argv(char **feh_argv, struct linked_node *node, size_t feh_len) {
+	struct linked_node *add_head = node;
 
 	for (int i = 3; i < (int) feh_len - 1; i++) {
 		feh_argv[i] = add_head->image;
@@ -407,7 +407,7 @@ void edit_feh_argv(char** feh_argv, linked_node* node, size_t feh_len) {
 	}
 }
 
-void free_feh_argv(char** feh_argv) {
+void free_feh_argv(char **feh_argv) {
 	//elements 3 to i-1 are owned by others i is null
 	if (feh_argv != NULL) {
 		for (size_t i = 0; i < 3; i++) {
@@ -419,16 +419,20 @@ void free_feh_argv(char** feh_argv) {
 	}
 }
 
-static void sig_int_quit_term_cb(evutil_socket_t sig, short events, void* user_data) {
-	loop_context* context = (loop_context*) user_data;
+static void sig_int_quit_term_cb(evutil_socket_t sig, short events, void *user_data) {
+	(void) sig;
+	(void) events;
+	struct loop_context *context = (struct loop_context*) user_data;
 
 	struct timeval delay = {1, 0};
 
 	event_base_loopexit(context->event_box->base, &delay);
 }
 
-static void sighup_cb(evutil_socket_t sig, short events, void* user_data) {
-	loop_context* context = (loop_context* ) user_data;
+static void sighup_cb(evutil_socket_t sig, short events, void *user_data) {
+	(void) sig;
+	(void) events;
+	struct loop_context *context = (struct loop_context* ) user_data;
 
 	syslog(LOG_NOTICE, "SIGHUP has been recived: regening config");
 
@@ -521,8 +525,10 @@ static void sighup_cb(evutil_socket_t sig, short events, void* user_data) {
 	syslog(LOG_NOTICE, "config regened");
 }
 
-static void sigusr1_cb(evutil_socket_t sig, short events, void* user_data) {
-	loop_context* context = (loop_context*) user_data;
+static void sigusr1_cb(evutil_socket_t sig, short events, void *user_data) {
+	(void) sig;
+	(void) events;
+	struct loop_context *context = (struct loop_context*) user_data;
 
 	syslog(LOG_NOTICE, "SIGUSR1 has been recived: skiping ahead");
 	//skip ahead
@@ -566,8 +572,10 @@ static void sigusr1_cb(evutil_socket_t sig, short events, void* user_data) {
 	event_add(context->event_box->timer, context->seconds);
 }
 
-static void sigusr2_cb(evutil_socket_t sig, short events, void* user_data) {
-	loop_context* context = (loop_context*) user_data;
+static void sigusr2_cb(evutil_socket_t sig, short events, void *user_data) {
+	(void) sig;
+	(void) events;
+	struct loop_context *context = (struct loop_context*) user_data;
 
 	//re shuffle the picture list
 	syslog(LOG_NOTICE, "SIGUSR2 has been recived: reshuffling picture list");
@@ -613,8 +621,10 @@ static void sigusr2_cb(evutil_socket_t sig, short events, void* user_data) {
 	event_add(context->event_box->timer, context->seconds);
 }
 
-static void timer_expire_cb(evutil_socket_t fd, short events, void* user_data) {
-	loop_context* context = (loop_context*) user_data;
+static void timer_expire_cb(evutil_socket_t fd, short events, void *user_data) {
+	(void) fd;
+	(void) events;
+	struct loop_context *context = (struct loop_context*) user_data;
 
 	feh_exec(context->feh_path, context->feh_argv, context->env);
 	if (context->info->options->colors != 0) {

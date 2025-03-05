@@ -1,5 +1,5 @@
 /*
-Copyright 2021-2022, 2025 Dotz0cat
+Copyright 2025 Dotz0cat
 
 This file is part of walld.
 
@@ -17,20 +17,12 @@ This file is part of walld.
     along with walld.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef MAIN_H
-#define MAIN_H
+#ifndef MAIN_PRIVATE_H
+#define MAIN_PRIVATE_H
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <signal.h>
-#include <syslog.h>
+#include "main.h"
 
-#include "config.h"
-#include "list.h"
-#include "loop.h"
-#include "magic.h"
+static void init_daemon(void);
+static struct pre_init_stuff *pre_init(char *config, int time, char *source, int monitors);
 
-#endif /* MAIN_H */
+#endif /* MAIN_PRIVATE_H */

@@ -1,5 +1,5 @@
 /*
-Copyright 2021-2022 Dotz0cat
+Copyright 2021-2022, 2025 Dotz0cat
 
 This file is part of walld.
 
@@ -30,30 +30,20 @@ This file is part of walld.
 #include <limits.h>
 #include <regex.h>
 
-#include "magic.h"
+struct linked_node {
+	char *image;
 
-typedef struct _linked_node linked_node;
-
-struct _linked_node {
-	char* image;
-
-	void* next;
+	void *next;
 };
 
-linked_node* add_node_to_list(linked_node* prev, char* data);
-linked_node* wind_to_tail(linked_node* node);
-linked_node* wind_to_x(linked_node* node, int x);
-void free_list(linked_node* head);
-void free_circular_list(linked_node* head);
-linked_node* shuffle(linked_node* head);
-static inline void relink(linked_node* prev, linked_node* next);
-void array_swap(linked_node** a, linked_node** b);
-linked_node* get_images(linked_node* source);
-file_type get_file_type(const char* path);
-linked_node* list_files_full(const char* directory);
-char* realpath_wrap(const char* path, const char* dir);
-char** list_to_null_termed_string_array(linked_node* head, size_t* len);
-
-#include "config.h"
+struct linked_node *add_node_to_list(struct linked_node *prev, char *data);
+struct linked_node *wind_to_tail(struct linked_node *node);
+struct linked_node *wind_to_x(struct linked_node *node, int x);
+void free_list(struct linked_node *head);
+void free_circular_list(struct linked_node *head);
+struct linked_node *shuffle(struct linked_node *head);
+struct linked_node *get_images(struct linked_node *source);
+struct linked_node *list_files_full(const char *directory);
+char **list_to_null_termed_string_array(struct linked_node *head, size_t *len);
 
 #endif /* LIST_H */

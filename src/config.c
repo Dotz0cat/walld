@@ -1,5 +1,5 @@
 /*
-Copyright 2021-2022 Dotz0cat
+Copyright 2021-2022, 2025 Dotz0cat
 
 This file is part of walld.
 
@@ -17,25 +17,25 @@ This file is part of walld.
     along with walld.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "config.h"
+#include "config_private.h"
 
-settings* read_config(const char* config_file, const char* home_dir, const char* source_from_line) {
-	settings* options = malloc(sizeof(settings));
+struct settings *read_config(const char *config_file, const char *home_dir, const char *source_from_line) {
+	struct settings *options = malloc(sizeof(struct settings));
 
 	config_t config;
-	config_setting_t* setting;
-	const char* source;
+	config_setting_t *setting;
+	const char *source;
 	int colors;
 	int dark;
 	int use_xrdb;
-	const char* bg_style;
-	const char* x_auth;
-	const char* display;
+	const char *bg_style;
+	const char *x_auth;
+	const char *display;
 	int minutes;
 	int monitors;
-	const char* feh_path;
-	const char* xrdb_path;
-	const char* xresources;
+	const char *feh_path;
+	const char *xrdb_path;
+	const char *xresources;
 
 	//check if file exsits
 	if (file_exsits(config_file) != 0) {
@@ -45,7 +45,7 @@ settings* read_config(const char* config_file, const char* home_dir, const char*
 			//tough luck
 			abort();
 		}
-		char* walld_folder = malloc(char_count + 1U);
+		char *walld_folder = malloc(char_count + 1U);
 
 		if (walld_folder == NULL) {
 			//tough luck
@@ -155,15 +155,15 @@ settings* read_config(const char* config_file, const char* home_dir, const char*
 	if (setting != NULL) {
 		int count = config_setting_length(setting);
 
-		linked_node* entry_point = add_node_to_list(NULL, NULL);
+		struct linked_node *entry_point = add_node_to_list(NULL, NULL);
 
-		linked_node* current = entry_point;
+		struct linked_node *current = entry_point;
 
 		options->sources = entry_point;
 
 
 		for (int i = 0; i < count; i++) {
-			char* item = strdup(config_setting_get_string_elem(setting, i));
+			char *item = strdup(config_setting_get_string_elem(setting, i));
 
 			current = add_node_to_list(current, item);
 		}
@@ -175,7 +175,7 @@ settings* read_config(const char* config_file, const char* home_dir, const char*
 			//tough luck
 			abort();
 		}
-		char* default_folder = malloc(char_count + 1U);
+		char *default_folder = malloc(char_count + 1U);
 
 		if (default_folder == NULL) {
 			//tough luck
@@ -194,11 +194,11 @@ settings* read_config(const char* config_file, const char* home_dir, const char*
 		options->xrdb_path = NULL;
 	}
 
-	config_setting_t* xrdb_args;
+	config_setting_t *xrdb_args;
 
-	linked_node* entry_point = add_node_to_list(NULL, NULL);
+	struct linked_node *entry_point = add_node_to_list(NULL, NULL);
 
-	linked_node* current = entry_point;
+	struct linked_node *current = entry_point;
 
 	options->xrdb_argv = entry_point;
 
@@ -208,7 +208,7 @@ settings* read_config(const char* config_file, const char* home_dir, const char*
 		int count = config_setting_length(xrdb_args);
 
 		for (int i = 0; i < count; i++) {
-			char* item = strdup(config_setting_get_string_elem(setting, i));
+			char *item = strdup(config_setting_get_string_elem(setting, i));
 
 			current = add_node_to_list(current, item);
 		}
@@ -229,7 +229,7 @@ settings* read_config(const char* config_file, const char* home_dir, const char*
 			//tough luck
 			abort();
 		}
-		char* xres = malloc(char_count + 1U);
+		char *xres = malloc(char_count + 1U);
 
 		if (xres == NULL) {
 			//tough luck
@@ -246,14 +246,14 @@ settings* read_config(const char* config_file, const char* home_dir, const char*
 	return options;
 }
 
-linked_node* list_file_parse(const char* list_file) {
-	linked_node* entry_point = add_node_to_list(NULL, NULL);
+struct linked_node *list_file_parse(const char *list_file) {
+	struct linked_node *entry_point = add_node_to_list(NULL, NULL);
 
-	linked_node* current = entry_point;
+	struct linked_node *current = entry_point;
 
 	config_t config;
-	config_setting_t* setting;
-	const char* source;
+	config_setting_t *setting;
+	const char *source;
 
 	config_init(&config);
 
@@ -275,7 +275,7 @@ linked_node* list_file_parse(const char* list_file) {
 		int count = config_setting_length(setting);
 
 		for (int i = 0; i < count; i++) {
-			char* item = strdup(config_setting_get_string_elem(setting, i));
+			char *item = strdup(config_setting_get_string_elem(setting, i));
 
 			current = add_node_to_list(current, item);
 		}
@@ -291,41 +291,41 @@ linked_node* list_file_parse(const char* list_file) {
 	return entry_point;
 }
 
-void produce_default_config(const char* output_file, const char* home_dir) {
+void produce_default_config(const char *output_file, const char *home_dir) {
 	config_t cfg;
 
 	config_init(&cfg);
 
-	config_setting_t* root;
+	config_setting_t *root;
 
 	root = config_root_setting(&cfg);
 
-	config_setting_t* colors;
+	config_setting_t *colors;
 
 	colors = config_setting_add(root, "colors", CONFIG_TYPE_BOOL);
 	config_setting_set_bool(colors, CONFIG_FALSE);
 
-	config_setting_t* dark;
+	config_setting_t *dark;
 
 	dark = config_setting_add(root, "dark", CONFIG_TYPE_BOOL);
 	config_setting_set_bool(dark, CONFIG_TRUE);
 
-	config_setting_t* minutes;
+	config_setting_t *minutes;
 
 	minutes = config_setting_add(root, "minutes", CONFIG_TYPE_INT);
 	config_setting_set_int(minutes, 30);
 
-	config_setting_t* monitors;
+	config_setting_t *monitors;
 
 	monitors = config_setting_add(root, "monitors", CONFIG_TYPE_INT);
 	config_setting_set_int(monitors, 1);
 
-	config_setting_t* source;
+	config_setting_t *source;
 
 	source = config_setting_add(root, "source_to_use", CONFIG_TYPE_STRING);
 	config_setting_set_string(source, "default");
 
-	config_setting_t* default_source;
+	config_setting_t *default_source;
 
 	default_source = config_setting_add(root, "default", CONFIG_TYPE_ARRAY);
 
@@ -335,7 +335,7 @@ void produce_default_config(const char* output_file, const char* home_dir) {
 		//tough luck
 		abort();
 	}
-	char* default_folder = malloc(char_count + 1U);
+	char *default_folder = malloc(char_count + 1U);
 
 	if (default_folder == NULL) {
 		//tough luck
@@ -344,7 +344,7 @@ void produce_default_config(const char* output_file, const char* home_dir) {
 
 	snprintf(default_folder, char_count + 1U, "%s%s", home_dir, "/.walld/images");
 
-	config_setting_t* array;
+	config_setting_t *array;
 
 	array = config_setting_add(default_source, NULL, CONFIG_TYPE_STRING);
 	config_setting_set_string(array, default_folder);
@@ -359,8 +359,8 @@ void produce_default_config(const char* output_file, const char* home_dir) {
 }
 
 //0 if exsits 1 if not
-static inline int file_exsits(const char* file) {
-	FILE* fp;
+static inline int file_exsits(const char *file) {
+	FILE *fp;
 
 	if ((fp = fopen(file, "r"))) {
 		fclose(fp);
@@ -371,8 +371,8 @@ static inline int file_exsits(const char* file) {
 	}
 }
 
-static inline int folder_exsits(const char* folder) {
-	DIR* dir;
+static inline int folder_exsits(const char *folder) {
+	DIR *dir;
 
 	dir = opendir(folder);
 
@@ -385,13 +385,13 @@ static inline int folder_exsits(const char* folder) {
 	}
 }
 
-static inline void check_default_image_folder(const char* home_dir) {
+static inline void check_default_image_folder(const char *home_dir) {
 	int image_folder_char_count = snprintf(NULL, 0, "%s%s", home_dir, "/.walld/images");
 	if (image_folder_char_count <= 0) {
 		//tough luck
 		abort();
 	}
-	char* default_image_folder = malloc(image_folder_char_count + 1U);
+	char *default_image_folder = malloc(image_folder_char_count + 1U);
 
 	if (default_image_folder == NULL) {
 		//tough luck

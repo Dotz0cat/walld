@@ -1,5 +1,5 @@
 /*
-Copyright 2021-2022, 2025 Dotz0cat
+Copyright 2025 Dotz0cat
 
 This file is part of walld.
 
@@ -17,20 +17,17 @@ This file is part of walld.
     along with walld.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef MAIN_H
-#define MAIN_H
+#ifndef LIST_PRIVATE_H
+#define LIST_PRIVATE_H
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <signal.h>
-#include <syslog.h>
-
-#include "config.h"
 #include "list.h"
-#include "loop.h"
-#include "magic.h"
 
-#endif /* MAIN_H */
+#include "magic.h"
+#include "config.h"
+
+static inline void relink(struct linked_node *prev, struct linked_node *next);
+static void array_swap(struct linked_node **a, struct linked_node **b);
+static enum file_type get_file_type(const char *path);
+static char *realpath_wrap(const char *path, const char *dir);
+
+#endif /* LIST_PRIVATE_H */

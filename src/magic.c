@@ -1,5 +1,5 @@
 /*
-Copyright 2021-2022 Dotz0cat
+Copyright 2021-2022, 2025 Dotz0cat
 
 This file is part of walld.
 
@@ -17,14 +17,14 @@ This file is part of walld.
     along with walld.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "magic.h"
+#include "magic_private.h"
 
-file_type image_or_text(const char* path) {
-	Image* image;
+enum file_type image_or_text(const char *path) {
+	Image *image;
 
-	ImageInfo* info;
+	ImageInfo *info;
 
-	ExceptionInfo* exception;
+	ExceptionInfo *exception;
 
 	exception = AcquireExceptionInfo();
 
@@ -53,7 +53,7 @@ file_type image_or_text(const char* path) {
     return IMAGE;
 }
 
-void magick_start(const char* argv1) {
+void magick_start(const char *argv1) {
 	MagickCoreGenesis(argv1, MagickFalse);
 }
 
@@ -65,12 +65,12 @@ void magick_threads(const int threads) {
 	SetMagickResourceLimit(ThreadResource, threads);
 }
 
-char** get_colors(const char* path, int num_of_colors, size_t* actual_colors) {
-	Image* image;
+char **get_colors(const char *path, int num_of_colors, size_t *actual_colors) {
+	Image *image;
 
-	ImageInfo* info;
+	ImageInfo *info;
 
-	ExceptionInfo* exception;
+	ExceptionInfo *exception;
 
 	exception = AcquireExceptionInfo();
 
@@ -90,7 +90,7 @@ char** get_colors(const char* path, int num_of_colors, size_t* actual_colors) {
 
     SyncImageSettings(info, image, exception);
 
-    Image* fifty;
+    Image *fifty;
 
     fifty = MinifyImage(image, exception);
 
@@ -100,7 +100,7 @@ char** get_colors(const char* path, int num_of_colors, size_t* actual_colors) {
 		CatchException(exception);
 	}
 
-    Image* quarter;
+    Image *quarter;
 
     quarter = MinifyImage(fifty, exception);
 
@@ -110,7 +110,7 @@ char** get_colors(const char* path, int num_of_colors, size_t* actual_colors) {
 		CatchException(exception);
 	}
 
-    QuantizeInfo* quant;
+    QuantizeInfo *quant;
 
     quant = AcquireQuantizeInfo(info);
 
@@ -124,7 +124,7 @@ char** get_colors(const char* path, int num_of_colors, size_t* actual_colors) {
 		CatchException(exception);
 	}
 
-    Image* unique;
+    Image *unique;
 
     unique = UniqueImageColors(quarter, exception);
 
@@ -138,11 +138,11 @@ char** get_colors(const char* path, int num_of_colors, size_t* actual_colors) {
 
 	char** color_array = malloc(color_num * sizeof(char*));
 
-	PixelInfo* histo;
+	PixelInfo *histo;
 
 	histo = GetImageHistogram(unique, &color_num, exception);
 
-	PixelInfo* p;
+	PixelInfo *p;
 	PixelInfo pixel;
 
 	p = histo;
@@ -153,7 +153,7 @@ char** get_colors(const char* path, int num_of_colors, size_t* actual_colors) {
 		pixel = (*p);
 
 		//get memory
-		char* hex = malloc(4096);
+		char *hex = malloc(4096);
 
 		GetColorTuple(&pixel, MagickTrue, hex);
 
@@ -179,13 +179,13 @@ char** get_colors(const char* path, int num_of_colors, size_t* actual_colors) {
 }
 
 //dark is 0 light is anything not 0
-void put_colors_in_file(const char* home_dir, const char* image, int dark) {
+void put_colors_in_file(const char *home_dir, const char *image, int dark) {
 	int char_count = snprintf(NULL, 0, "%s%s", home_dir, "/.walld/colors");
 	if (char_count <= 0) {
 		//tough luck
 		abort();
 	}
-	char* color_file = malloc(char_count + 1U);
+	char *color_file = malloc(char_count + 1U);
 
 	if (color_file == NULL) {
 		//tough luck
@@ -235,7 +235,7 @@ void put_colors_in_file(const char* home_dir, const char* image, int dark) {
 	//hsl
 
 	//for the off chance there is an alpha channel I fix it
-	char** dealpha = malloc(sizeof(char*) * len);
+	char **dealpha = malloc(sizeof(char*) * len);
 
 	if (dealpha == NULL) {
 		abort();
@@ -245,7 +245,7 @@ void put_colors_in_file(const char* home_dir, const char* image, int dark) {
 		dealpha[k] = remove_alpha(list[k]);
 	}
 
-	char** list2 = malloc(sizeof(char*) * len);
+	char **list2 = malloc(sizeof(char*) * len);
 
 	if (list2 == NULL) {
 		abort();
@@ -256,10 +256,10 @@ void put_colors_in_file(const char* home_dir, const char* image, int dark) {
 			list2[k] = strdup(dealpha[k]);
 		}
 
-		rgb* rgb1 = hex_to_rgb(list2[7]);
-		rgb* rgb2 = hex_to_rgb("#eeeeee");
+		struct rgb *rgb1 = hex_to_rgb(list2[7]);
+		struct rgb *rgb2 = hex_to_rgb("#eeeeee");
 
-		rgb* rgb3 = blend_colors(rgb1, rgb2);
+		struct rgb *rgb3 = blend_colors(rgb1, rgb2);
 
 		free(list2[7]);
 		list2[7] = rgb_to_hex(rgb3);
@@ -268,7 +268,7 @@ void put_colors_in_file(const char* home_dir, const char* image, int dark) {
 		free(rgb2);
 		free(rgb3);
 
-		rgb* rgb4 = hex_to_rgb(list2[7]);
+		struct rgb *rgb4 = hex_to_rgb(list2[7]);
 
 		darken_rgb(rgb4, 0.30);
 
@@ -277,10 +277,10 @@ void put_colors_in_file(const char* home_dir, const char* image, int dark) {
 
 		free(rgb4);
 
-		rgb* rgb5 = hex_to_rgb(list2[15]);
-		rgb* rgb6 = hex_to_rgb("#eeeeee");
+		struct rgb *rgb5 = hex_to_rgb(list2[15]);
+		struct rgb *rgb6 = hex_to_rgb("#eeeeee");
 
-		rgb* rgb7 = blend_colors(rgb5, rgb6);
+		struct rgb *rgb7 = blend_colors(rgb5, rgb6);
 
 		free(list2[15]);
 		list2[15] = rgb_to_hex(rgb7);
@@ -292,15 +292,15 @@ void put_colors_in_file(const char* home_dir, const char* image, int dark) {
 	}
 	else {
 		for (int k = 0; k < (int) len; k++) {
-			rgb* rgb1 = hex_to_rgb(dealpha[k]);
+			struct rgb *rgb1 = hex_to_rgb(dealpha[k]);
 
-			hsl* hsl1 = rgb_to_hsl(rgb1);
+			struct hsl *hsl1 = rgb_to_hsl(rgb1);
 
 			hsl1->s = 0.5;
 
-			rgb* rgb2 = hsl_to_rgb(hsl1);
+			struct rgb *rgb2 = hsl_to_rgb(hsl1);
 
-			char* hex = rgb_to_hex(rgb2);
+			char *hex = rgb_to_hex(rgb2);
 
 			list2[k] = hex;
 
@@ -309,7 +309,7 @@ void put_colors_in_file(const char* home_dir, const char* image, int dark) {
 			free(rgb2);
 		} 
 
-		rgb* rgb1 = hex_to_rgb(dealpha[0]);
+		struct rgb *rgb1 = hex_to_rgb(dealpha[0]);
 		free(list2[0]);
 
 		lighten_rgb(rgb1, 0.85);
@@ -320,7 +320,7 @@ void put_colors_in_file(const char* home_dir, const char* image, int dark) {
 		free(list2[7]);
 		list2[7] = strdup(dealpha[0]);
 
-		rgb* rgb2 = hex_to_rgb(dealpha[0]);
+		struct rgb *rgb2 = hex_to_rgb(dealpha[0]);
 		free(list2[8]);
 
 		darken_rgb(rgb2, 0.4);
@@ -333,7 +333,7 @@ void put_colors_in_file(const char* home_dir, const char* image, int dark) {
 
 	}
 	
-	FILE* fp = fopen(color_file, "w");
+	FILE *fp = fopen(color_file, "w");
 
 	for (int j = 0; j < (int) len; j++) {
 		fprintf(fp, "#define c%i %s\n", j, list2[j]);
@@ -350,8 +350,8 @@ void put_colors_in_file(const char* home_dir, const char* image, int dark) {
 	free(color_file);
 }
 
-rgb* hex_to_rgb(const char* hex_string) {
-	rgb* hex_as_rgb = malloc(sizeof(rgb));
+struct rgb *hex_to_rgb(const char *hex_string) {
+	struct rgb *hex_as_rgb = malloc(sizeof(struct rgb));
 	if (hex_as_rgb == NULL) {
 		abort();
 	}
@@ -361,8 +361,8 @@ rgb* hex_to_rgb(const char* hex_string) {
 	return hex_as_rgb;
 }
 
-hsl* rgb_to_hsl(const rgb* color) {
-	hsl* hsl_conv = malloc(sizeof(hsl));
+struct hsl *rgb_to_hsl(const struct rgb *color) {
+	struct hsl *hsl_conv = malloc(sizeof(struct hsl));
 
 	if (hsl_conv == NULL) {
 		abort();
@@ -414,8 +414,8 @@ hsl* rgb_to_hsl(const rgb* color) {
 	return hsl_conv;
 }
 
-rgb* hsl_to_rgb(const hsl* color) {
-	rgb* rgb_conv = malloc(sizeof(rgb));
+struct rgb *hsl_to_rgb(const struct hsl *color) {
+	struct rgb *rgb_conv = malloc(sizeof(struct rgb));
 
 	if (rgb_conv == NULL) {
 		abort();
@@ -474,8 +474,8 @@ rgb* hsl_to_rgb(const hsl* color) {
 	return rgb_conv;
 }
 
-char* rgb_to_hex(const rgb* color) {
-	char* hex = malloc(4096);
+char *rgb_to_hex(const struct rgb *color) {
+	char *hex = malloc(4096);
 
 	if (hex == NULL) {
 		abort();
@@ -484,27 +484,27 @@ char* rgb_to_hex(const rgb* color) {
 	snprintf(hex, 8, "#%02x%02x%02x", color->r, color->g, color->b);
 
 	//strdup trims the memory needed
-	char* hex2 = strdup(hex);
+	char *hex2 = strdup(hex);
 
 	free(hex);
 
 	return hex2;
 }
 
-void lighten_rgb(rgb* color, float factor) {
+void lighten_rgb(struct rgb *color, float factor) {
 	color->r = (unsigned int) (color->r + ((255 - color->r) * factor));
 	color->g = (unsigned int) (color->g + ((255 - color->g) * factor));
 	color->b = (unsigned int) (color->b + ((255 - color->b) * factor));
 }
 
-void darken_rgb(rgb* color, float factor) {
+void darken_rgb(struct rgb *color, float factor) {
 	color->r = (unsigned int) (color->r * (1 - factor));
 	color->g = (unsigned int) (color->g * (1 - factor));
 	color->b = (unsigned int) (color->b * (1 - factor));
 }
 
-rgb* blend_colors(rgb* color1, rgb* color2) {
-	rgb* rgb3 = malloc(sizeof(rgb));
+struct rgb *blend_colors(struct rgb *color1, struct rgb *color2) {
+	struct rgb *rgb3 = malloc(sizeof(struct rgb));
 
 	rgb3->r = (unsigned int) ((color1->r * .5) + (color2->r * .5));
 	rgb3->g = (unsigned int) ((color1->g * .5) + (color2->g * .5));
@@ -513,8 +513,8 @@ rgb* blend_colors(rgb* color1, rgb* color2) {
 	return rgb3;
 }
 
-char* remove_alpha(const char* hex) {
-	char* hex2 = malloc(8 * sizeof(char));
+char *remove_alpha(const char *hex) {
+	char *hex2 = malloc(8 * sizeof(char));
 
 	if (hex2 == NULL) {
 		abort();
@@ -526,8 +526,8 @@ char* remove_alpha(const char* hex) {
 	return hex2;
 }
 
-void write_default(const char* color_file) {
-	FILE* fp = fopen(color_file, "w");
+void write_default(const char *color_file) {
+	FILE *fp = fopen(color_file, "w");
 
 	//taken from man 1 xterm
 	fprintf (fp, "#define c0 #000000\n");

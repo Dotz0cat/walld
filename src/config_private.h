@@ -1,5 +1,5 @@
 /*
-Copyright 2021-2022, 2025 Dotz0cat
+Copyright 2025 Dotz0cat
 
 This file is part of walld.
 
@@ -17,20 +17,13 @@ This file is part of walld.
     along with walld.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef MAIN_H
-#define MAIN_H
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <signal.h>
-#include <syslog.h>
+#ifndef CONFIG_PRIVATE_H
+#define CONFIG_PRIVATE_H
 
 #include "config.h"
-#include "list.h"
-#include "loop.h"
-#include "magic.h"
 
-#endif /* MAIN_H */
+static inline int file_exsits(const char *file);
+static inline int folder_exsits(const char *folder);
+static inline void check_default_image_folder(const char *home_dir);
+
+#endif /* CONFIG_PRIVATE_H */

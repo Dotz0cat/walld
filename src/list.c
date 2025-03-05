@@ -1,5 +1,5 @@
 /*
-Copyright 2021-2022 Dotz0cat
+Copyright 2021-2022, 2025 Dotz0cat
 
 This file is part of walld.
 
@@ -17,11 +17,11 @@ This file is part of walld.
     along with walld.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "list.h"
+#include "list_private.h"
 
-linked_node* add_node_to_list(linked_node* prev, char* data) {
+struct linked_node *add_node_to_list(struct linked_node *prev, char *data) {
 	if (prev == NULL) {
-		linked_node* node = malloc(sizeof(linked_node));
+		struct linked_node *node = malloc(sizeof(struct linked_node));
 
 		node->image = data;
 
@@ -37,7 +37,7 @@ linked_node* add_node_to_list(linked_node* prev, char* data) {
 			return prev;
 		}
 		else {
-			linked_node* node = malloc(sizeof(linked_node));
+			struct linked_node *node = malloc(sizeof(struct linked_node));
 
 			prev->next = node;
 
@@ -50,7 +50,7 @@ linked_node* add_node_to_list(linked_node* prev, char* data) {
 	}
 }
 
-linked_node* wind_to_tail(linked_node* node) {
+struct linked_node *wind_to_tail(struct linked_node *node) {
 	while (node->next != NULL) {
 		node = node->next;
 	}
@@ -58,8 +58,8 @@ linked_node* wind_to_tail(linked_node* node) {
 	return node;
 }
 
-linked_node* wind_to_x(linked_node* node, int x) {
-	linked_node* head = node;
+struct linked_node *wind_to_x(struct linked_node *node, int x) {
+	struct linked_node *head = node;
 
 	for (int i = 0; i < x; i++) {
 		head = head->next;		
@@ -68,9 +68,9 @@ linked_node* wind_to_x(linked_node* node, int x) {
 	return head;
 }
 
-void free_list(linked_node* head) {
-	linked_node* free_head;
-	linked_node* temp;
+void free_list(struct linked_node *head) {
+	struct linked_node *free_head;
+	struct linked_node *temp;
 
 	free_head = head;
 
@@ -84,9 +84,9 @@ void free_list(linked_node* head) {
 	}
 }
 
-void free_circular_list(linked_node* head) {
-	linked_node* free_head;
-	linked_node* temp;
+void free_circular_list(struct linked_node *head) {
+	struct linked_node *free_head;
+	struct linked_node *temp;
 
 	free_head = head;
 
@@ -100,19 +100,19 @@ void free_circular_list(linked_node* head) {
 	} while (free_head != NULL && free_head != head);
 }
 
-linked_node* shuffle(linked_node* head) {
+struct linked_node *shuffle(struct linked_node *head) {
 	int count = 0;
-	linked_node* count_head = head;
+	struct linked_node *count_head = head;
 	do {
 		count++;
 		count_head = count_head->next;
 	} while (count_head != NULL && count_head != head);
 
-	linked_node** array = malloc(count * sizeof(linked_node*));
+	struct linked_node **array = malloc(count * sizeof(struct linked_node*));
 
 	int i = 0;
 
-	linked_node* add_head = head;
+	struct linked_node *add_head = head;
 
 	for (i = 0; i < count; i++) {
 		array[i] = add_head;
@@ -133,7 +133,7 @@ linked_node* shuffle(linked_node* head) {
 		relink(array[k], array[k + 1]);
 	}
 
-	linked_node* new_head = array[0];
+	struct linked_node *new_head = array[0];
 
 	array[count - 1]->next = new_head;
 
@@ -142,33 +142,33 @@ linked_node* shuffle(linked_node* head) {
 	return new_head;
 }
 
-static inline void relink(linked_node* prev, linked_node* next) {
+static inline void relink(struct linked_node *prev, struct linked_node *next) {
 	if (prev != NULL && next != NULL) {
 		prev->next = next;
 	}
 }
 
-void array_swap(linked_node** a, linked_node** b) {
-	linked_node* temp = *a;
+static void array_swap(struct linked_node **a, struct linked_node **b) {
+	struct linked_node *temp = *a;
 	*a = *b;
 	*b = temp;
 }
 
-linked_node* get_images(linked_node* source) {
-	linked_node* entry_point = add_node_to_list(NULL, NULL);
+struct linked_node *get_images(struct linked_node *source) {
+	struct linked_node *entry_point = add_node_to_list(NULL, NULL);
 
-	linked_node* current = entry_point;
+	struct linked_node *current = entry_point;
 
 	do {
-		file_type type = get_file_type(source->image);
+		enum file_type type = get_file_type(source->image);
 
 		switch(type) {
 			case (DIRECTORY): {
-				linked_node* dir_list;
+				struct linked_node *dir_list;
 				dir_list = list_files_full(source->image);
 
 				if (dir_list != NULL) {
-					linked_node* typed = get_images(dir_list);
+					struct linked_node *typed = get_images(dir_list);
 
 					if (typed != NULL) {
 						if (current == entry_point) {
@@ -191,10 +191,10 @@ linked_node* get_images(linked_node* source) {
 				break;
 			}	
 			case(LIST): {
-				linked_node* file_contents = list_file_parse(source->image);
+				struct linked_node *file_contents = list_file_parse(source->image);
 
 				if (file_contents != NULL) {
-					linked_node* typed = get_images(file_contents);
+					struct linked_node *typed = get_images(file_contents);
 
 					if (typed != NULL) {
 						if (current == entry_point) {
@@ -236,7 +236,7 @@ linked_node* get_images(linked_node* source) {
 	return entry_point;
 }
 
-file_type get_file_type(const char* path) {
+static enum file_type get_file_type(const char *path) {
 	if (path == NULL) {
 		return ERROR;
 	}
@@ -244,7 +244,7 @@ file_type get_file_type(const char* path) {
 		return ERROR;
 	}
 
-	DIR* dir = opendir(path);
+	DIR *dir = opendir(path);
 
 	if (dir != NULL) {
 		closedir(dir);
@@ -274,22 +274,22 @@ file_type get_file_type(const char* path) {
 	}
 }
 
-linked_node* list_files_full(const char* directory) {
-	struct dirent* d;
+struct linked_node *list_files_full(const char *directory) {
+	struct dirent *d;
 
-	DIR* dir;
+	DIR *dir;
 
 	dir = opendir(directory);
 
-	linked_node* entry_point = add_node_to_list(NULL, NULL);
+	struct linked_node *entry_point = add_node_to_list(NULL, NULL);
 
-	linked_node* current = entry_point;
+	struct linked_node *current = entry_point;
 
 	if (dir != NULL) {
 		while ((d = readdir(dir)) != NULL) {
 			if (strcmp(d->d_name, ".") != 0) {
 				if (strcmp(d->d_name, "..") != 0) {
-					char* real = realpath_wrap(d->d_name, directory);
+					char *real = realpath_wrap(d->d_name, directory);
 
 					if (real != NULL) {
 						current = add_node_to_list(current, real);
@@ -314,14 +314,14 @@ linked_node* list_files_full(const char* directory) {
 	return entry_point;
 }
 
-char* realpath_wrap(const char* path, const char* dir) {
+static char *realpath_wrap(const char *path, const char *dir) {
 	int count = snprintf(NULL, 0, "%s%s%s", dir, "/", path);
 
 	if (count <= 0) {
 		return NULL;
 	}
 
-	char* longer_path = malloc(count + 1U);
+	char *longer_path = malloc(count + 1U);
 
 	if (longer_path == NULL) {
 		return NULL;
@@ -329,16 +329,16 @@ char* realpath_wrap(const char* path, const char* dir) {
 
 	snprintf(longer_path, count + 1U, "%s%s%s", dir, "/", path);
 
-	char* res = realpath(longer_path, NULL);
+	char *res = realpath(longer_path, NULL);
 
 #if defined(PATH_MAX) && PATH_MAX > 0
 
 	if (res == NULL && longer_path != NULL && errno == EINVAL) {
 
-		char* resolved_path = malloc(PATH_MAX);
+		char *resolved_path = malloc(PATH_MAX);
 
 		if (resolved_path != NULL) {
-			char* tmp = realpath(longer_path, resolved_path);
+			char *tmp = realpath(longer_path, resolved_path);
 
 			if (tmp != NULL) {
 				res = strdup(tmp);
@@ -356,9 +356,9 @@ char* realpath_wrap(const char* path, const char* dir) {
 	return res;
 }
 
-char** list_to_null_termed_string_array(linked_node* head, size_t* len) {
+char **list_to_null_termed_string_array(struct linked_node *head, size_t *len) {
 	int count = 0;
-	linked_node* count_head = head;
+	struct linked_node *count_head = head;
 	do {
 		count++;
 		count_head = count_head->next;
@@ -372,7 +372,7 @@ char** list_to_null_termed_string_array(linked_node* head, size_t* len) {
 
 	int i = 0;
 
-	linked_node* add_head = head;
+	struct linked_node *add_head = head;
 
 	for (i = 0; i < count - 1; i++) {
 		array[i] = strdup(add_head->image);

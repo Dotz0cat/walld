@@ -1,5 +1,5 @@
 /*
-Copyright 2021-2022, 2025 Dotz0cat
+Copyright 2025 Dotz0cat
 
 This file is part of walld.
 
@@ -17,21 +17,39 @@ This file is part of walld.
     along with walld.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef MAGIC_H
-#define MAGIC_H
+#ifndef MAGIC_PRIVATE_H
+#define MAGIC_PRIVATE_H
 
-enum file_type {
-	DIRECTORY,
-	IMAGE,
-	LIST,
-	ERROR
+#include <ImageMagick-7/MagickCore/MagickCore.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <math.h>
+
+#include "magic.h"
+
+struct hsl {
+    float h;
+    float s;
+    float l;
 };
 
-enum file_type image_or_text(const char *path);
-void magick_start(const char *argv1);
-void magick_stop(void);
-void magick_threads(const int threads);
+struct rgb {
+    unsigned int r;
+    unsigned int g;
+    unsigned int b;
+};
+
 char **get_colors(const char *path, int num_of_colors, size_t *actual_colors);
 void put_colors_in_file(const char *home_dir, const char *image, int dark);
+struct rgb *hex_to_rgb(const char *hex_string);
+struct hsl *rgb_to_hsl(const struct rgb *color);
+struct rgb *hsl_to_rgb(const struct hsl *color);
+char *rgb_to_hex(const struct rgb *color);
+void lighten_rgb(struct rgb *color, float factor);
+void darken_rgb(struct rgb *color, float factor);
+struct rgb *blend_colors(struct rgb *color1, struct rgb *color2);
+char *remove_alpha(const char *hex);
+void write_default(const char *color_file);
 
-#endif /* MAGIC_H */
+#endif /* MAGIC_PRIVATE_H */
