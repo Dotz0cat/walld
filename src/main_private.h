@@ -24,5 +24,21 @@ This file is part of walld.
 
 static void init_daemon(void);
 static struct pre_init_stuff *pre_init(char *config, int time, char *source, int monitors);
+static inline void set_xdg_directory(char **target, const char *env_var, const char *string0, const char *string2);
+static inline void set_xdg_directories(struct xdg_directories *restrict xdg_dir);
+
+#define STRCONCAT(s1, s2, s3) \
+do { \
+    size_t char_count = snprintf(NULL, 0U, "%s%s", s1, s2); \
+\
+    if (char_count <= 0) abort(); \
+\
+    s3 = malloc(char_count + 1U); \
+\
+    if (s3 == NULL) abort(); \
+\
+    snprintf(s3, char_count + 1U, "%s%s", s1, s2); \
+\
+} while(0);
 
 #endif /* MAIN_PRIVATE_H */

@@ -22,8 +22,24 @@ This file is part of walld.
 
 #include "config.h"
 
+static const struct settings DEFAULT_CONFIG = {
+    /* colors */     0,
+    /* dark */       1,
+    /* xrdb_use */   0,
+    /* feh_path */   NULL,
+    /* xrdb_path */  NULL,
+    /* minutes */    30,
+    /* bg_style */   NULL,
+    /* x_auth */     NULL,
+    /* display */    NULL,
+    /* monitors */   1,
+    /* sources */    NULL,
+    /* xrdb_argv */  NULL
+};
+
 static inline int file_exsits(const char *file);
 static inline int folder_exsits(const char *folder);
-static inline void check_default_image_folder(const char *home_dir);
+static inline void check_image_folder(const char *image_folder);
+static void default_settings(const struct xdg_directories *restrict xdg_dir, struct settings *options);
 
 #endif /* CONFIG_PRIVATE_H */

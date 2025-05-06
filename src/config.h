@@ -53,7 +53,17 @@ struct settings {
 	struct linked_node *xrdb_argv;
 };
 
-struct settings *read_config(const char *config_file, const char *home_dir, const char *source_from_line);
+struct xdg_directories {
+	char *home_dir;
+	char *xdg_config_home;
+	char *xdg_config_dir;
+	char *xdg_data_home;
+	char *xdg_data_dirs;
+	char *xdg_state_home;
+	char *xdg_runtime_dir;
+};
+
+struct settings *read_config(const char *restrict config_file, const struct xdg_directories *restrict xdg_dir, const char *source_from_line);
 struct linked_node *list_file_parse(const char *list_file);
 void produce_default_config(const char *output_file, const char *home_dir);
 

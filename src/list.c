@@ -383,3 +383,13 @@ char **list_to_null_termed_string_array(struct linked_node *head, size_t *len) {
 
 	return array;
 }
+
+void replace_node(struct linked_node *restrict node, const char *new_data) {
+	if (node == NULL) return;
+
+	if (node->image != NULL) {
+		free(node->image);
+	}
+
+	node->image = strdup(new_data);
+}

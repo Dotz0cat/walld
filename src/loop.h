@@ -35,8 +35,8 @@ This file is part of walld.
 
 struct pre_init_stuff {
 
-	//store the home dir becuase once forked it will loose it
-	char *home_dir;
+	//store xdg_directories becuase once forked it will loose it
+	struct xdg_directories *xdg_dir;
 
 	//this is from the command line
 	char *source;

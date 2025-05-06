@@ -90,7 +90,14 @@ int main(int argc, char **argv) {
 	}
 	free(info->options);
 
-	free(info->home_dir);
+	free(info->xdg_dir->home_dir);
+	free(info->xdg_dir->xdg_config_home);
+	free(info->xdg_dir->xdg_config_dir);
+	free(info->xdg_dir->xdg_data_home);
+	free(info->xdg_dir->xdg_data_dirs);
+	free(info->xdg_dir->xdg_state_home);
+	free(info->xdg_dir->xdg_runtime_dir);
+	free(info->xdg_dir);
 	if (info->source != NULL) {
 		free(info->source);
 	}
@@ -165,6 +172,7 @@ static void init_daemon() {
 static struct pre_init_stuff *pre_init(char *config, int time, char *source, int monitors) {
 
 	struct pre_init_stuff* info = malloc(sizeof(struct pre_init_stuff));
+	info->xdg_dir = malloc(sizeof(struct xdg_directories));
 
 	char* home = getenv("HOME");
 
@@ -174,7 +182,28 @@ static struct pre_init_stuff *pre_init(char *config, int time, char *source, int
         home = pw->pw_dir;
 	}
 
-	info->home_dir = strdup(home);
+	info->xdg_dir->home_dir = strdup(home);
+
+	/*
+		xdg_directories members:
+			home_dir
+			xdg_config_home
+			xdg_config_dir
+			xdg_data_home
+			xdg_data_dirs
+			xdg_state_home
+			xdg_runtime_dir
+	*/
+	set_xdg_directories(info->xdg_dir);
+	
+	char *xdg_runtime_dir = getenv("XDG_RUNTIME_DIR");
+
+	if (xdg_runtime_dir == NULL || strcmp(xdg_runtime_dir, "")) {
+		fprintf(stderr, "ERROR: Unable to find $XDG_RUNTIME_DIR\n");
+	}
+
+	info->xdg_dir->xdg_runtime_dir = strdup(xdg_runtime_dir);
+
 
 	char *x_auth = strdup(getenv("XAUTHORITY"));
 
@@ -352,11 +381,120 @@ static struct pre_init_stuff *pre_init(char *config, int time, char *source, int
 
 	if (info->picture_list == NULL) {
 
-		fprintf(stderr, "Walld found no suitable images to use\r\n");
+		fprintf(stderr, "Walld found no suitable images to use\n");
 		abort();
 	}
 
 	info->picture_list = shuffle(info->picture_list);
 
 	return info;
+}
+
+static inline void set_xdg_directory(char **target, const char *env_var, const char *string0, const char *string2) {
+	char *env_val = getenv(env_var);
+
+	if (env_val == NULL) {
+		int count = snprintf(NULL, 0, "%s%s", string0, string1);
+
+		char *value = malloc(count + 1U);
+
+		if (value == NULL) {
+			abort();
+		}
+
+		snprintf(value, count, "%s%s", string0, string1);
+
+		*target = value;
+	}
+	else {
+		*target = strdup(env_val);
+	}
+}
+
+static inline void set_xdg_directories(struct xdg_directories *restrict xdg_dir) {
+	set_xdg_directory(&xdg_dir->xdg_config_home, "XDG_CONFIG_HOME", xdg_dir->home_dir, "/.config");
+	set_xdg_directory(&xdg_dir->xdg_config_dir, "XDG_CONFIG_DIRS", "/etc", "/xdg");
+	set_xdg_directory(&xdg_dir->xdg_data_home, "XDG_DATA_HOME", xdg_dir->home_dir, "/.local/share");
+	set_xdg_directory(&xdg_dir->xdg_data_dirs, "XDG_DATA_DIRS", " /usr/local/share:", "/usr/share");
+	set_xdg_directory(&xdg_dir->xdg_state_home, "XDG_STATE_HOME", xdg_dir->home_dir, "/.local/state");
+}
+
+static inline void find_config(struct xdg_directories *restrict xdg_dir, char **restrict config) {
+	int char_count = snprintf(NULL, 0U, "%s%s", xdg_dir->xdg_config_home, "/walld/config");
+
+	char *potiental_config = malloc(char_count + 1U);
+
+	if (potiental_config == NULL) {
+		abort();
+	}
+
+	snprintf(potiental_config, char_count + 1U, "%s%s", xdg_dir->xdg_config_home, "/walld/config");
+
+	if (access(potiental_config, F_OK) == 0) {
+		*config = potiental_config;
+		return;
+	}
+
+	free(potiental_config);
+
+	char *directories = strdup(xdg_dir->xdg_config_dir);
+
+	char *dir_tok;
+
+	dir_tok = strtok(directories, ":");
+
+	while (dir_tok != NULL) {
+		char_count = snprintf(NULL, 0U, "%s%s", dir_tok, "/walld/config");
+
+		potiental_config = malloc(char_count + 1U);
+
+		if (potiental_config == NULL) {
+			abort();
+		}
+
+		snprintf(potiental_config, char_count + 1U, "%s%s", dir_tok, "/walld/config");
+
+		if (access(potiental_config, F_OK) == 0) {
+			*config = potiental_config;
+			free(directories);
+			return;
+		}
+
+		free(potiental_config);
+
+		dir_tok = strtok(NULL, ":");
+	}
+
+	free(directories);
+
+	//depracated default
+	char_count = snprintf(NULL, 0U, "%s%s", xdg_dir->home_dir, "/.walld/.walldrc");
+
+	potiental_config = malloc(char_count + 1U);
+
+	if (potiental_config == NULL) {
+		abort();
+	}
+
+	snprintf(potiental_config, char_count + 1U, "%s%s", xdg_dir->home_dir, "/.walld/.walldrc");
+
+	if (access(potiental_config, F_OK) == 0) {
+		*config = potiental_config;
+		return;
+	}
+
+	//new default
+	char_count = snprintf(NULL, 0U, "%s%s", xdg_dir->xdg_config_home, "/walld/config");
+
+	potiental_config = malloc(char_count + 1U);
+
+	if (potiental_config == NULL) {
+		abort();
+	}
+
+	snprintf(potiental_config, char_count + 1U, "%s%s", xdg_dir->xdg_config_home, "/walld/config");
+
+	*config = potiental_config;
+
+	return;
 }

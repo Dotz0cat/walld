@@ -45,5 +45,6 @@ struct linked_node *shuffle(struct linked_node *head);
 struct linked_node *get_images(struct linked_node *source);
 struct linked_node *list_files_full(const char *directory);
 char **list_to_null_termed_string_array(struct linked_node *head, size_t *len);
+void replace_node(struct linked_node *restrict node, const char *new_data);
 
 #endif /* LIST_H */
